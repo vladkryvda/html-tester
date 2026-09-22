@@ -29,7 +29,7 @@
       overflow: hidden;
     }
 
-    /* Prevent text selection and cursor capture during pane resizing */
+    /* Blocks selection only while dragging splitter */
     body.is-resizing,
     body.is-resizing * {
       user-select: none !important;
@@ -133,7 +133,6 @@
       tab-size: 2;
     }
 
-    /* Resizer slider */
     .resizer {
       background-color: var(--border);
       flex-shrink: 0;
@@ -194,6 +193,7 @@
       border-radius: 14px;
       z-index: 10;
       border: 1px solid #1c1c1f;
+      pointer-events: none; /* Allows clicks right next to notch */
     }
 
     iframe {
@@ -203,9 +203,9 @@
       background: #09090b;
       color-scheme: dark;
       border-radius: 42px;
+      pointer-events: auto !important;
     }
 
-    /* Desktop mode styles */
     .preview-pane.is-desktop {
       padding: 0;
       background: #09090b;
@@ -265,7 +265,8 @@
       <div class="device-scaler" id="scaler">
         <div class="device-wrapper" id="device">
           <div class="device-notch" id="notch"></div>
-          <iframe id="viewport-frame" sandbox="allow-scripts allow-modals"></iframe>
+          <!-- Sandbox updated to enable all interactive buttons, inputs, scripts -->
+          <iframe id="viewport-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"></iframe>
         </div>
       </div>
     </section>
@@ -293,7 +294,6 @@
     let isLandscape = false;
     let isStacked = false;
 
-    // Default template for blank state
     const EMPTY_DARK_TEMPLATE = `<!DOCTYPE html>
 <html>
 <head>
@@ -313,17 +313,13 @@
 
     editor.value = localStorage.getItem('sim_code_clean') || '';
 
-    // Resolves HTML to ensure it never paints an opaque white canvas on unstyled/empty input
     function getPreparedHtml(code) {
       const trimmed = code.trim();
-      if (!trimmed) {
-        return EMPTY_DARK_TEMPLATE;
-      }
+      if (!trimmed) return EMPTY_DARK_TEMPLATE;
 
       const hasDocType = /<!doctype/i.test(trimmed);
       const hasHtmlTag = /<html[\s>]/i.test(trimmed);
 
-      // If snippet without full document structure, wrap with dark base
       if (!hasDocType && !hasHtmlTag) {
         return `<!DOCTYPE html>
 <html>
@@ -346,7 +342,6 @@
 </html>`;
       }
 
-      // If complete document, inject color-scheme if missing to prevent default white canvas
       if (!trimmed.includes('color-scheme')) {
         return trimmed.replace(/<head[\s>]/i, '$&<meta name="color-scheme" content="dark">');
       }
@@ -412,8 +407,15 @@
       }
     }
 
-    // Drag Resizer
+    // Resizing logic with failsafes
     let isDragging = false;
+
+    function stopDragging() {
+      if (isDragging) {
+        isDragging = false;
+        document.body.classList.remove('is-resizing');
+      }
+    }
 
     resizer.addEventListener('mousedown', () => {
       isDragging = true;
@@ -437,12 +439,8 @@
       updateView();
     });
 
-    window.addEventListener('mouseup', () => {
-      if (isDragging) {
-        isDragging = false;
-        document.body.classList.remove('is-resizing');
-      }
-    });
+    window.addEventListener('mouseup', stopDragging);
+    window.addEventListener('blur', stopDragging);
 
     const resizeObserver = new ResizeObserver(() => {
       updateView();
@@ -480,7 +478,6 @@
       applyLayout();
     });
 
-    // Indent tab support
     editor.addEventListener('keydown', (e) => {
       if (e.key === 'Tab') {
         e.preventDefault();
