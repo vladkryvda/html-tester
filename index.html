@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,7 +29,7 @@
       overflow: hidden;
     }
 
-    /* Блокування виділення тексту під час перетягування */
+    /* Prevent text selection and cursor capture during pane resizing */
     body.is-resizing,
     body.is-resizing * {
       user-select: none !important;
@@ -133,7 +133,7 @@
       tab-size: 2;
     }
 
-    /* Роздільник (Слайдер ресайзу) */
+    /* Resizer slider */
     .resizer {
       background-color: var(--border);
       flex-shrink: 0;
@@ -158,7 +158,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #050507;
+      background: #09090b;
       overflow: hidden;
       position: relative;
       padding: 20px;
@@ -196,19 +196,19 @@
       border: 1px solid #1c1c1f;
     }
 
-    /* Темний фон для iframe за замовчуванням */
     iframe {
       width: 100%;
       height: 100%;
       border: none;
-      background: #0e0e11;
+      background: #09090b;
       color-scheme: dark;
       border-radius: 42px;
     }
 
-    /* Стилі для режиму Desktop */
+    /* Desktop mode styles */
     .preview-pane.is-desktop {
       padding: 0;
+      background: #09090b;
     }
 
     .is-desktop .device-scaler {
@@ -223,7 +223,7 @@
       border: none;
       border-radius: 0;
       box-shadow: none;
-      background: transparent;
+      background: #09090b;
     }
 
     .is-desktop .device-notch {
@@ -232,6 +232,7 @@
 
     .is-desktop iframe {
       border-radius: 0;
+      background: #09090b;
     }
   </style>
 </head>
@@ -244,7 +245,7 @@
       <button class="btn" data-type="mobile" data-w="393" data-h="852">iPhone 15/16 Pro</button>
       <button class="btn" data-type="mobile" data-w="360" data-h="800">Android Base</button>
       <button class="btn" id="rotate-btn" disabled>Rotate</button>
-      <span class="dim-label" id="dimensions-display">Desktop (Full)</span>
+      <span class="dim-label" id="dimensions-display">Desktop (Full Width)</span>
     </div>
 
     <div class="controls">
@@ -255,7 +256,7 @@
 
   <main id="main-layout">
     <section class="editor-pane" id="editor-container">
-      <textarea id="code-input" spellcheck="false" placeholder="Встав свій HTML/CSS код сюди..."></textarea>
+      <textarea id="code-input" spellcheck="false" placeholder="Paste your HTML/CSS code here..."></textarea>
     </section>
 
     <div class="resizer" id="resizer"></div>
@@ -292,12 +293,69 @@
     let isLandscape = false;
     let isStacked = false;
 
-    // Редактор починає порожнім
+    // Default template for blank state
+    const EMPTY_DARK_TEMPLATE = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="dark">
+  <style>
+    html, body {
+      background-color: #09090b !important;
+      color: #a1a1aa;
+      margin: 0;
+      height: 100%;
+    }
+  </style>
+</head>
+<body></body>
+</html>`;
+
     editor.value = localStorage.getItem('sim_code_clean') || '';
 
-    // Миттєвий рендер без затримок
+    // Resolves HTML to ensure it never paints an opaque white canvas on unstyled/empty input
+    function getPreparedHtml(code) {
+      const trimmed = code.trim();
+      if (!trimmed) {
+        return EMPTY_DARK_TEMPLATE;
+      }
+
+      const hasDocType = /<!doctype/i.test(trimmed);
+      const hasHtmlTag = /<html[\s>]/i.test(trimmed);
+
+      // If snippet without full document structure, wrap with dark base
+      if (!hasDocType && !hasHtmlTag) {
+        return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="dark">
+  <style>
+    html, body {
+      background-color: #09090b;
+      color: #fafafa;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 16px;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  ${code}
+</body>
+</html>`;
+      }
+
+      // If complete document, inject color-scheme if missing to prevent default white canvas
+      if (!trimmed.includes('color-scheme')) {
+        return trimmed.replace(/<head[\s>]/i, '$&<meta name="color-scheme" content="dark">');
+      }
+
+      return trimmed;
+    }
+
     function renderPreview() {
-      iframe.srcdoc = editor.value;
+      iframe.srcdoc = getPreparedHtml(editor.value);
       localStorage.setItem('sim_code_clean', editor.value);
     }
 
@@ -354,7 +412,7 @@
       }
     }
 
-    // Ресайзер між редактором і прев'ю
+    // Drag Resizer
     let isDragging = false;
 
     resizer.addEventListener('mousedown', () => {
@@ -391,7 +449,6 @@
     });
     resizeObserver.observe(previewContainer);
 
-    // Перемикання пресетів пристроїв
     modeBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         modeBtns.forEach(b => b.classList.remove('active'));
@@ -404,13 +461,12 @@
           isDesktop = false;
           currentW = parseInt(btn.dataset.w);
           currentH = parseInt(btn.dataset.h);
-          applyLayout(true); // Завжди повертати у Side-by-Side для мобільних
+          applyLayout(true);
         }
         updateView();
       });
     });
 
-    // Поворот мобільного екрана (Rotate)
     rotateBtn.addEventListener('click', () => {
       if (isDesktop) return;
       isLandscape = !isLandscape;
@@ -418,14 +474,13 @@
       updateView();
     });
 
-    // Зміна розташування (Side-by-Side проти Stacked)
     layoutBtn.addEventListener('click', () => {
       if (!isDesktop) return;
       isStacked = !isStacked;
       applyLayout();
     });
 
-    // Підтримка Tab у textarea
+    // Indent tab support
     editor.addEventListener('keydown', (e) => {
       if (e.key === 'Tab') {
         e.preventDefault();
