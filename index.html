@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Viewport Simulator</title>
+  <title>Viewport Simulator & Editor</title>
   <style>
     :root {
       --bg: #09090b;
@@ -29,6 +29,7 @@
       overflow: hidden;
     }
 
+    /* Верхня панель */
     header {
       height: 48px;
       border-bottom: 1px solid var(--border);
@@ -39,6 +40,7 @@
       background: var(--surface);
       font-size: 13px;
       flex-shrink: 0;
+      z-index: 20;
     }
 
     .controls {
@@ -51,12 +53,12 @@
       background: #18181b;
       border: 1px solid var(--border);
       color: var(--text);
-      padding: 5px 9px;
+      padding: 5px 10px;
       border-radius: 4px;
       font-size: 12px;
       font-family: inherit;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: border-color 0.15s ease, color 0.15s ease;
       white-space: nowrap;
     }
 
@@ -71,6 +73,12 @@
       border-color: #52525b;
     }
 
+    .btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      border-color: var(--border);
+    }
+
     .dim-label {
       font-size: 11px;
       color: #71717a;
@@ -78,19 +86,31 @@
       margin-left: 8px;
     }
 
+    /* Основна робоча область */
     main {
       flex: 1;
       display: flex;
       height: calc(100vh - 48px);
       overflow: hidden;
+      flex-direction: row;
+    }
+
+    main.layout-stacked {
+      flex-direction: column;
     }
 
     .editor-pane {
-      width: 45%;
+      width: 50%;
       height: 100%;
-      border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
+      min-width: 150px;
+      min-height: 100px;
+    }
+
+    main.layout-stacked .editor-pane {
+      width: 100%;
+      height: 45%;
     }
 
     textarea {
@@ -108,7 +128,32 @@
       tab-size: 2;
     }
 
-    /* Контейнер прев'ю без можливості прокрутки */
+    /* Мінімалістичний дільник без зміни кольору */
+    .resizer {
+      background-color: var(--border);
+      flex-shrink: 0;
+      z-index: 15;
+    }
+
+    main:not(.layout-stacked) .resizer {
+      width: 4px;
+      height: 100%;
+      cursor: col-resize;
+    }
+
+    main.layout-stacked .resizer {
+      width: 100%;
+      height: 4px;
+      cursor: row-resize;
+    }
+
+    /* Зафіксовано постійний колір: жодних яскравих підсвіток при hover чи drag */
+    .resizer:hover, 
+    .resizer:active {
+      background-color: var(--border);
+    }
+
+    /* Зона перегляду */
     .preview-pane {
       flex: 1;
       height: 100%;
@@ -119,15 +164,20 @@
       overflow: hidden;
       position: relative;
       padding: 20px;
+      min-width: 150px;
+      min-height: 100px;
     }
 
-    /* Обгортка для масштабування через transform */
+    main.layout-stacked .preview-pane {
+      width: 100%;
+    }
+
     .device-scaler {
       display: flex;
       align-items: center;
       justify-content: center;
       transform-origin: center center;
-      transition: transform 0.15s ease-out;
+      transition: transform 0.05s ease-out;
     }
 
     .device-wrapper {
@@ -142,7 +192,6 @@
       flex-shrink: 0;
     }
 
-    /* Динамічний острівець / виріз */
     .device-notch {
       position: absolute;
       top: 10px;
@@ -163,30 +212,62 @@
       background: #fff;
       border-radius: 42px;
     }
+
+    /* Специфіка Desktop режиму */
+    .preview-pane.is-desktop {
+      padding: 0;
+    }
+
+    .is-desktop .device-scaler {
+      width: 100%;
+      height: 100%;
+      transform: none !important;
+    }
+
+    .is-desktop .device-wrapper {
+      width: 100% !important;
+      height: 100% !important;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      background: transparent;
+    }
+
+    .is-desktop .device-notch {
+      display: none !important;
+    }
+
+    .is-desktop iframe {
+      border-radius: 0;
+    }
   </style>
 </head>
 <body>
 
   <header>
     <div class="controls">
-      <button class="btn" data-w="375" data-h="667">iPhone SE</button>
-      <button class="btn" data-w="375" data-h="812">iPhone 13 mini</button>
-      <button class="btn active" data-w="393" data-h="852">iPhone 15/16 Pro</button>
-      <button class="btn" data-w="360" data-h="800">Android Base</button>
-      <button class="btn" id="rotate-btn">Rotate</button>
-      <span class="dim-label" id="dimensions-display">393 × 852 px</span>
+      <button class="btn active" data-type="desktop">Desktop</button>
+      <button class="btn" data-type="mobile" data-w="375" data-h="812">iPhone 13 mini</button>
+      <button class="btn" data-type="mobile" data-w="393" data-h="852">iPhone 15/16 Pro</button>
+      <button class="btn" data-type="mobile" data-w="360" data-h="800">Android Base</button>
+      <button class="btn" id="rotate-btn" disabled>Rotate</button>
+      <span class="dim-label" id="dimensions-display">Desktop (Full)</span>
     </div>
+
     <div class="controls">
-      <button class="btn" id="clear-btn">Clear Code</button>
+      <button class="btn" id="layout-btn">Layout: Side-by-Side</button>
+      <button class="btn" id="clear-btn">Clear</button>
     </div>
   </header>
 
-  <main>
-    <section class="editor-pane">
-      <textarea id="code-input" spellcheck="false" placeholder="Встав сюди свій HTML/CSS код..."></textarea>
+  <main id="main-layout">
+    <section class="editor-pane" id="editor-pane">
+      <textarea id="code-input" spellcheck="false" placeholder="Встав сюди HTML/CSS код..."></textarea>
     </section>
 
-    <section class="preview-pane" id="preview-container">
+    <div class="resizer" id="resizer"></div>
+
+    <section class="preview-pane is-desktop" id="preview-container">
       <div class="device-scaler" id="scaler">
         <div class="device-wrapper" id="device">
           <div class="device-notch" id="notch"></div>
@@ -203,44 +284,51 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      font-family: -apple-system, sans-serif;
-      padding: 24px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 32px;
       background: #09090b;
       color: #fafafa;
       margin: 0;
     }
-    .card {
-      border: 1px solid #27272a;
-      padding: 16px;
-      border-radius: 12px;
-      background: #121215;
-      margin-top: 16px;
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
     }
-    h1 { font-size: 18px; margin: 0 0 8px 0; }
-    p { font-size: 13px; line-height: 1.5; color: #a1a1aa; margin: 0 0 12px 0; }
-    button {
-      width: 100%;
-      background: #fafafa;
-      color: #09090b;
-      border: none;
-      padding: 10px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
+    h1 { font-size: 22px; margin: 0 0 12px 0; }
+    p { font-size: 14px; line-height: 1.6; color: #a1a1aa; }
+    .box {
+      background: #121215;
+      border: 1px solid #27272a;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 20px;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      padding: 3px 8px;
+      background: #27272a;
+      border-radius: 4px;
+      color: #d4d4d8;
+      margin-bottom: 8px;
     }
   </style>
 </head>
 <body>
-  <h1>Auto-Scale Preview</h1>
-  <p>Розмір фрейму залишається чесним, але телефон автоматично адаптується під висоту вікна без прокрутки.</p>
-  <div class="card">
-    <p>Тест інтерактивних елементів всередині пісочниці:</p>
-    <button onclick="alert('Інтерфейс клікабельний!')">Тест дії</button>
+  <div class="container">
+    <div class="badge">Live View</div>
+    <h1>Мінімалістичний тест адаптивності</h1>
+    <p>Тягни роздільну лінію між редактором та переглядом, щоб наживо змінювати пропорції екрана.</p>
+    <div class="box">
+      <p style="margin: 0;">Спробуй перемкнути пресет на iPhone 13 mini або Android зверху.</p>
+    </div>
   </div>
 </body>
 </html>`;
 
+    const mainLayout = document.getElementById('main-layout');
+    const editorPane = document.getElementById('editor-pane');
+    const resizer = document.getElementById('resizer');
     const editor = document.getElementById('code-input');
     const iframe = document.getElementById('viewport-frame');
     const device = document.getElementById('device');
@@ -248,67 +336,172 @@
     const previewContainer = document.getElementById('preview-container');
     const dimDisplay = document.getElementById('dimensions-display');
     const notch = document.getElementById('notch');
-    const presetBtns = document.querySelectorAll('[data-w]');
+    const modeBtns = document.querySelectorAll('[data-type]');
     const rotateBtn = document.getElementById('rotate-btn');
+    const layoutBtn = document.getElementById('layout-btn');
     const clearBtn = document.getElementById('clear-btn');
 
+    let isDesktop = true;
     let currentW = 393;
     let currentH = 852;
     let isLandscape = false;
+    let isStacked = false; // Тільки для десктопу
 
-    editor.value = localStorage.getItem('sim_code_v2') || defaultTemplate;
+    editor.value = localStorage.getItem('sim_code_v4') || defaultTemplate;
 
     function renderPreview() {
       const code = editor.value;
       iframe.srcdoc = code;
-      localStorage.setItem('sim_code_v2', code);
+      localStorage.setItem('sim_code_v4', code);
     }
 
-    // Розрахунок авто-масштабу під контейнер
-    function updateDimensionsAndScale() {
-      const w = isLandscape ? currentH : currentW;
-      const h = isLandscape ? currentW : currentH;
-      
-      // Встановлюємо реальний піксельний розмір фрейму
-      device.style.width = `${w}px`;
-      device.style.height = `${h}px`;
-      
-      // Орієнтація вирізу/острівця
-      notch.style.display = isLandscape ? 'none' : 'block';
+    function updateView() {
+      if (isDesktop) {
+        previewContainer.classList.add('is-desktop');
+        rotateBtn.disabled = true;
+        rotateBtn.classList.remove('active');
+        layoutBtn.disabled = false;
 
-      // Обчислюємо доступну область з урахуванням відступів (padding 40px)
-      const availW = previewContainer.clientWidth - 40;
-      const availH = previewContainer.clientHeight - 40;
+        const w = previewContainer.clientWidth;
+        const h = previewContainer.clientHeight;
+        dimDisplay.textContent = `Desktop (${w} × ${h} px)`;
+      } else {
+        previewContainer.classList.remove('is-desktop');
+        rotateBtn.disabled = false;
+        
+        // Для телефонів завжди відключаємо Stacked view
+        if (isStacked) {
+          isStacked = false;
+          mainLayout.classList.remove('layout-stacked');
+          layoutBtn.textContent = 'Layout: Side-by-Side';
+          editorPane.style.width = '50%';
+          editorPane.style.height = '100%';
+        }
+        layoutBtn.disabled = true; // Заборонено для телефонів
 
-      // Рамка додає 4px товщини
-      const totalW = w + 4;
-      const totalH = h + 4;
+        const w = isLandscape ? currentH : currentW;
+        const h = isLandscape ? currentW : currentH;
+        
+        device.style.width = `${w}px`;
+        device.style.height = `${h}px`;
+        notch.style.display = isLandscape ? 'none' : 'block';
 
-      // Визначаємо коефіцієнт зменшення
-      let scale = Math.min(availW / totalW, availH / totalH);
-      
-      // Не збільшувати понад 100%, лише зменшувати для вміщення
-      if (scale > 1) scale = 1;
+        const availW = previewContainer.clientWidth - 40;
+        const availH = previewContainer.clientHeight - 40;
+        const totalW = w + 4;
+        const totalH = h + 4;
 
-      scaler.style.transform = `scale(${scale})`;
+        let scale = Math.min(availW / totalW, availH / totalH);
+        if (scale > 1) scale = 1;
 
-      const pct = Math.round(scale * 100);
-      dimDisplay.textContent = `${w} × ${h} px (${pct}%)`;
+        scaler.style.transform = `scale(${scale})`;
+        const pct = Math.round(scale * 100);
+        dimDisplay.textContent = `${w} × ${h} px (${pct}%)`;
+      }
     }
 
-    // Слухач ресайзу контейнера для плавного адаптування
+    // Логіка перетягування роздільної лінії (Resizer)
+    let isDragging = false;
+
+    resizer.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      iframe.style.pointerEvents = 'none'; // Щоб iframe не блокував події миші
+      document.body.style.userSelect = 'none';
+      document.body.style.cursor = isStacked ? 'row-resize' : 'col-resize';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+
+      const rect = mainLayout.getBoundingClientRect();
+      if (!isStacked) {
+        const newWidth = e.clientX - rect.left;
+        const minW = 160;
+        const maxW = rect.width - 160;
+        if (newWidth >= minW && newWidth <= maxW) {
+          editorPane.style.width = `${newWidth}px`;
+          editorPane.style.height = '100%';
+        }
+      } else {
+        const newHeight = e.clientY - rect.top;
+        const minH = 100;
+        const maxH = rect.height - 100;
+        if (newHeight >= minH && newHeight <= maxH) {
+          editorPane.style.height = `${newHeight}px`;
+          editorPane.style.width = '100%';
+        }
+      }
+      updateView();
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+        iframe.style.pointerEvents = 'auto';
+        document.body.style.userSelect = '';
+        document.body.style.cursor = '';
+        updateView();
+      }
+    });
+
+    // Спостерігач ресайзу для збереження авто-масштабу
     const resizeObserver = new ResizeObserver(() => {
-      updateDimensionsAndScale();
+      updateView();
     });
     resizeObserver.observe(previewContainer);
 
+    // Перемикання пресетів
+    modeBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        modeBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        if (btn.dataset.type === 'desktop') {
+          isDesktop = true;
+        } else {
+          isDesktop = false;
+          currentW = parseInt(btn.dataset.w);
+          currentH = parseInt(btn.dataset.h);
+          isLandscape = false;
+        }
+        updateView();
+      });
+    });
+
+    // Поворот мобільного фрейму
+    rotateBtn.addEventListener('click', () => {
+      if (isDesktop) return;
+      isLandscape = !isLandscape;
+      rotateBtn.classList.toggle('active', isLandscape);
+      updateView();
+    });
+
+    // Перемикання розкладки (тільки для Desktop)
+    layoutBtn.addEventListener('click', () => {
+      if (!isDesktop) return;
+      isStacked = !isStacked;
+      if (isStacked) {
+        mainLayout.classList.add('layout-stacked');
+        layoutBtn.textContent = 'Layout: Stacked';
+        editorPane.style.width = '100%';
+        editorPane.style.height = '45%';
+      } else {
+        mainLayout.classList.remove('layout-stacked');
+        layoutBtn.textContent = 'Layout: Side-by-Side';
+        editorPane.style.width = '50%';
+        editorPane.style.height = '100%';
+      }
+      updateView();
+    });
+
+    // Дебаунс оновлення вмісту
     let debounceTimer;
     editor.addEventListener('input', () => {
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(renderPreview, 150);
     });
 
-    // Tab підтримка в редакторі
+    // Обробка клавіші Tab
     editor.addEventListener('keydown', (e) => {
       if (e.key === 'Tab') {
         e.preventDefault();
@@ -319,33 +512,15 @@
       }
     });
 
-    presetBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        presetBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentW = parseInt(btn.dataset.w);
-        currentH = parseInt(btn.dataset.h);
-        isLandscape = false;
-        rotateBtn.classList.remove('active');
-        updateDimensionsAndScale();
-      });
-    });
-
-    rotateBtn.addEventListener('click', () => {
-      isLandscape = !isLandscape;
-      rotateBtn.classList.toggle('active', isLandscape);
-      updateDimensionsAndScale();
-    });
-
     clearBtn.addEventListener('click', () => {
-      if (confirm('Очистити код?')) {
+      if (confirm('Очистити код у редакторі?')) {
         editor.value = '';
         renderPreview();
       }
     });
 
-    // Початковий рендер
-    updateDimensionsAndScale();
+    // Ініціалізація
+    updateView();
     renderPreview();
   </script>
 </body>
