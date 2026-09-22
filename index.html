@@ -29,7 +29,7 @@
       overflow: hidden;
     }
 
-    /* Блокування виділення тексту та курсору над iframe під час перетягування */
+    /* Блокування виділення тексту під час перетягування */
     body.is-resizing,
     body.is-resizing * {
       user-select: none !important;
@@ -196,11 +196,13 @@
       border: 1px solid #1c1c1f;
     }
 
+    /* Темний фон для iframe за замовчуванням */
     iframe {
       width: 100%;
       height: 100%;
       border: none;
-      background: #fff;
+      background: #0e0e11;
+      color-scheme: dark;
       border-radius: 42px;
     }
 
@@ -241,6 +243,7 @@
       <button class="btn" data-type="mobile" data-w="375" data-h="812">iPhone 13 mini</button>
       <button class="btn" data-type="mobile" data-w="393" data-h="852">iPhone 15/16 Pro</button>
       <button class="btn" data-type="mobile" data-w="360" data-h="800">Android Base</button>
+      <button class="btn" id="rotate-btn" disabled>Rotate</button>
       <span class="dim-label" id="dimensions-display">Desktop (Full)</span>
     </div>
 
@@ -255,7 +258,6 @@
       <textarea id="code-input" spellcheck="false" placeholder="Встав свій HTML/CSS код сюди..."></textarea>
     </section>
 
-    <!-- Роздільник між панелями -->
     <div class="resizer" id="resizer"></div>
 
     <section class="preview-pane is-desktop" id="preview-container">
@@ -278,19 +280,22 @@
     const scaler = document.getElementById('scaler');
     const previewContainer = document.getElementById('preview-container');
     const dimDisplay = document.getElementById('dimensions-display');
+    const notch = document.getElementById('notch');
     const modeBtns = document.querySelectorAll('[data-type]');
+    const rotateBtn = document.getElementById('rotate-btn');
     const layoutBtn = document.getElementById('layout-btn');
     const clearBtn = document.getElementById('clear-btn');
 
     let isDesktop = true;
     let currentW = 393;
     let currentH = 852;
+    let isLandscape = false;
     let isStacked = false;
 
-    // Редактор стартує порожнім
+    // Редактор починає порожнім
     editor.value = localStorage.getItem('sim_code_clean') || '';
 
-    // Миттєва візуалізація без затримок
+    // Миттєвий рендер без затримок
     function renderPreview() {
       iframe.srcdoc = editor.value;
       localStorage.setItem('sim_code_clean', editor.value);
@@ -317,32 +322,42 @@
     function updateView() {
       if (isDesktop) {
         previewContainer.classList.add('is-desktop');
+        rotateBtn.disabled = true;
+        rotateBtn.classList.remove('active');
+        isLandscape = false;
+
         const w = previewContainer.clientWidth;
         const h = previewContainer.clientHeight;
         dimDisplay.textContent = `Desktop (${w} × ${h} px)`;
       } else {
         previewContainer.classList.remove('is-desktop');
-        device.style.width = `${currentW}px`;
-        device.style.height = `${currentH}px`;
+        rotateBtn.disabled = false;
+
+        const w = isLandscape ? currentH : currentW;
+        const h = isLandscape ? currentW : currentH;
+
+        device.style.width = `${w}px`;
+        device.style.height = `${h}px`;
+        notch.style.display = isLandscape ? 'none' : 'block';
 
         const availW = previewContainer.clientWidth - 40;
         const availH = previewContainer.clientHeight - 40;
-        const totalW = currentW + 4;
-        const totalH = currentH + 4;
+        const totalW = w + 4;
+        const totalH = h + 4;
 
         let scale = Math.min(availW / totalW, availH / totalH);
         if (scale > 1) scale = 1;
 
         scaler.style.transform = `scale(${scale})`;
         const pct = Math.round(scale * 100);
-        dimDisplay.textContent = `${currentW} × ${currentH} px (${pct}%)`;
+        dimDisplay.textContent = `${w} × ${h} px (${pct}%)`;
       }
     }
 
-    // Ресайзер (drag and drop)
+    // Ресайзер між редактором і прев'ю
     let isDragging = false;
 
-    resizer.addEventListener('mousedown', (e) => {
+    resizer.addEventListener('mousedown', () => {
       isDragging = true;
       document.body.classList.add('is-resizing');
     });
@@ -376,6 +391,7 @@
     });
     resizeObserver.observe(previewContainer);
 
+    // Перемикання пресетів пристроїв
     modeBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         modeBtns.forEach(b => b.classList.remove('active'));
@@ -394,13 +410,22 @@
       });
     });
 
+    // Поворот мобільного екрана (Rotate)
+    rotateBtn.addEventListener('click', () => {
+      if (isDesktop) return;
+      isLandscape = !isLandscape;
+      rotateBtn.classList.toggle('active', isLandscape);
+      updateView();
+    });
+
+    // Зміна розташування (Side-by-Side проти Stacked)
     layoutBtn.addEventListener('click', () => {
       if (!isDesktop) return;
       isStacked = !isStacked;
       applyLayout();
     });
 
-    // Підтримка табуляції клавішею Tab
+    // Підтримка Tab у textarea
     editor.addEventListener('keydown', (e) => {
       if (e.key === 'Tab') {
         e.preventDefault();
