@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Viewport Simulator</title>
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #121215;
+      --border: #27272a;
+      --text: #a1a1aa;
+      --text-active: #fafafa;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    header {
+      height: 48px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      background: var(--surface);
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    .controls {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .btn {
+      background: #18181b;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 5px 9px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      color: var(--text-active);
+      border-color: #3f3f46;
+    }
+
+    .btn.active {
+      background: #27272a;
+      color: var(--text-active);
+      border-color: #52525b;
+    }
+
+    .dim-label {
+      font-size: 11px;
+      color: #71717a;
+      font-family: monospace;
+      margin-left: 8px;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      height: calc(100vh - 48px);
+      overflow: hidden;
+    }
+
+    .editor-pane {
+      width: 45%;
+      height: 100%;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    textarea {
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      color: #d4d4d8;
+      border: none;
+      padding: 16px;
+      font-family: "JetBrains Mono", Consolas, "Courier New", monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      resize: none;
+      outline: none;
+      tab-size: 2;
+    }
+
+    /* Контейнер прев'ю без можливості прокрутки */
+    .preview-pane {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #050507;
+      overflow: hidden;
+      position: relative;
+      padding: 20px;
+    }
+
+    /* Обгортка для масштабування через transform */
+    .device-scaler {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-origin: center center;
+      transition: transform 0.15s ease-out;
+    }
+
+    .device-wrapper {
+      position: relative;
+      border: 2px solid #3f3f46;
+      border-radius: 44px;
+      background: #000;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    /* Динамічний острівець / виріз */
+    .device-notch {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90px;
+      height: 22px;
+      background: #000;
+      border-radius: 14px;
+      z-index: 10;
+      border: 1px solid #1c1c1f;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #fff;
+      border-radius: 42px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="controls">
+      <button class="btn" data-w="375" data-h="667">iPhone SE</button>
+      <button class="btn" data-w="375" data-h="812">iPhone 13 mini</button>
+      <button class="btn active" data-w="393" data-h="852">iPhone 15/16 Pro</button>
+      <button class="btn" data-w="360" data-h="800">Android Base</button>
+      <button class="btn" id="rotate-btn">Rotate</button>
+      <span class="dim-label" id="dimensions-display">393 × 852 px</span>
+    </div>
+    <div class="controls">
+      <button class="btn" id="clear-btn">Clear Code</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="editor-pane">
+      <textarea id="code-input" spellcheck="false" placeholder="Встав сюди свій HTML/CSS код..."></textarea>
+    </section>
+
+    <section class="preview-pane" id="preview-container">
+      <div class="device-scaler" id="scaler">
+        <div class="device-wrapper" id="device">
+          <div class="device-notch" id="notch"></div>
+          <iframe id="viewport-frame" sandbox="allow-scripts allow-modals"></iframe>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const defaultTemplate = `<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: -apple-system, sans-serif;
+      padding: 24px;
+      background: #09090b;
+      color: #fafafa;
+      margin: 0;
+    }
+    .card {
+      border: 1px solid #27272a;
+      padding: 16px;
+      border-radius: 12px;
+      background: #121215;
+      margin-top: 16px;
+    }
+    h1 { font-size: 18px; margin: 0 0 8px 0; }
+    p { font-size: 13px; line-height: 1.5; color: #a1a1aa; margin: 0 0 12px 0; }
+    button {
+      width: 100%;
+      background: #fafafa;
+      color: #09090b;
+      border: none;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Auto-Scale Preview</h1>
+  <p>Розмір фрейму залишається чесним, але телефон автоматично адаптується під висоту вікна без прокрутки.</p>
+  <div class="card">
+    <p>Тест інтерактивних елементів всередині пісочниці:</p>
+    <button onclick="alert('Інтерфейс клікабельний!')">Тест дії</button>
+  </div>
+</body>
+</html>`;
+
+    const editor = document.getElementById('code-input');
+    const iframe = document.getElementById('viewport-frame');
+    const device = document.getElementById('device');
+    const scaler = document.getElementById('scaler');
+    const previewContainer = document.getElementById('preview-container');
+    const dimDisplay = document.getElementById('dimensions-display');
+    const notch = document.getElementById('notch');
+    const presetBtns = document.querySelectorAll('[data-w]');
+    const rotateBtn = document.getElementById('rotate-btn');
+    const clearBtn = document.getElementById('clear-btn');
+
+    let currentW = 393;
+    let currentH = 852;
+    let isLandscape = false;
+
+    editor.value = localStorage.getItem('sim_code_v2') || defaultTemplate;
+
+    function renderPreview() {
+      const code = editor.value;
+      iframe.srcdoc = code;
+      localStorage.setItem('sim_code_v2', code);
+    }
+
+    // Розрахунок авто-масштабу під контейнер
+    function updateDimensionsAndScale() {
+      const w = isLandscape ? currentH : currentW;
+      const h = isLandscape ? currentW : currentH;
+      
+      // Встановлюємо реальний піксельний розмір фрейму
+      device.style.width = `${w}px`;
+      device.style.height = `${h}px`;
+      
+      // Орієнтація вирізу/острівця
+      notch.style.display = isLandscape ? 'none' : 'block';
+
+      // Обчислюємо доступну область з урахуванням відступів (padding 40px)
+      const availW = previewContainer.clientWidth - 40;
+      const availH = previewContainer.clientHeight - 40;
+
+      // Рамка додає 4px товщини
+      const totalW = w + 4;
+      const totalH = h + 4;
+
+      // Визначаємо коефіцієнт зменшення
+      let scale = Math.min(availW / totalW, availH / totalH);
+      
+      // Не збільшувати понад 100%, лише зменшувати для вміщення
+      if (scale > 1) scale = 1;
+
+      scaler.style.transform = `scale(${scale})`;
+
+      const pct = Math.round(scale * 100);
+      dimDisplay.textContent = `${w} × ${h} px (${pct}%)`;
+    }
+
+    // Слухач ресайзу контейнера для плавного адаптування
+    const resizeObserver = new ResizeObserver(() => {
+      updateDimensionsAndScale();
+    });
+    resizeObserver.observe(previewContainer);
+
+    let debounceTimer;
+    editor.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(renderPreview, 150);
+    });
+
+    // Tab підтримка в редакторі
+    editor.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const start = editor.selectionStart;
+        const end = editor.selectionEnd;
+        editor.value = editor.value.substring(0, start) + '  ' + editor.value.substring(end);
+        editor.selectionStart = editor.selectionEnd = start + 2;
+      }
+    });
+
+    presetBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        presetBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentW = parseInt(btn.dataset.w);
+        currentH = parseInt(btn.dataset.h);
+        isLandscape = false;
+        rotateBtn.classList.remove('active');
+        updateDimensionsAndScale();
+      });
+    });
+
+    rotateBtn.addEventListener('click', () => {
+      isLandscape = !isLandscape;
+      rotateBtn.classList.toggle('active', isLandscape);
+      updateDimensionsAndScale();
+    });
+
+    clearBtn.addEventListener('click', () => {
+      if (confirm('Очистити код?')) {
+        editor.value = '';
+        renderPreview();
+      }
+    });
+
+    // Початковий рендер
+    updateDimensionsAndScale();
+    renderPreview();
+  </script>
+</body>
+</html>
