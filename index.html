@@ -115,7 +115,7 @@
 
     main.layout-stacked .editor-pane {
       width: 100%;
-      height: 45%;
+      height: 50%;
     }
 
     textarea {
@@ -133,22 +133,54 @@
       tab-size: 2;
     }
 
+    /* Тонка 1px лінія розділювача з комфортною зоною захоплення */
     .resizer {
       background-color: var(--border);
       flex-shrink: 0;
       z-index: 20;
+      position: relative;
+      transition: background-color 0.15s ease;
+    }
+
+    .resizer:hover,
+    body.is-resizing .resizer {
+      background-color: #3b82f6;
     }
 
     main:not(.layout-stacked) .resizer {
-      width: 5px;
+      width: 1px;
       height: 100%;
       cursor: col-resize;
     }
 
+    /* Невидима область натискання (8px) для горизонтального розділювача */
+    main:not(.layout-stacked) .resizer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: -4px;
+      right: -4px;
+      cursor: col-resize;
+      z-index: 1;
+    }
+
     main.layout-stacked .resizer {
-      height: 5px;
+      height: 1px;
       width: 100%;
       cursor: row-resize;
+    }
+
+    /* Невидима область натискання (8px) для вертикального розділювача */
+    main.layout-stacked .resizer::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: -4px;
+      bottom: -4px;
+      cursor: row-resize;
+      z-index: 1;
     }
 
     .preview-pane {
@@ -235,7 +267,6 @@
       background: #09090b;
     }
 
-    /* --- Абсолютно чистий Fullscreen без жодних рамок і зайвих елементів --- */
     .preview-pane:fullscreen {
       padding: 0 !important;
       margin: 0 !important;
@@ -275,7 +306,6 @@
     <div class="controls">
       <button class="btn" id="fullscreen-btn" title="View Fullscreen Without UI">⛶ Fullscreen</button>
       <button class="btn" id="layout-btn">Layout: Side-by-Side</button>
-      <button class="btn" id="clear-btn">Clear</button>
     </div>
   </header>
 
@@ -310,7 +340,6 @@
     const modeBtns = document.querySelectorAll('[data-type]');
     const rotateBtn = document.getElementById('rotate-btn');
     const layoutBtn = document.getElementById('layout-btn');
-    const clearBtn = document.getElementById('clear-btn');
     const fullscreenBtn = document.getElementById('fullscreen-btn');
 
     let isDesktop = true;
@@ -396,7 +425,6 @@
     function undo() {
       clearTimeout(historyDebounceTimer);
 
-      // Якщо є незафіксовані зміни перед скасуванням — фіксуємо їх
       if (history[historyIndex] && editor.value !== history[historyIndex].value) {
         history = history.slice(0, historyIndex + 1);
         history.push({
@@ -421,7 +449,6 @@
       }
     }
 
-    // Слухач гарячих клавіш Ctrl+Z / Cmd+Z та Redo на рівні всього вікна
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && document.fullscreenElement) {
         document.exitFullscreen();
@@ -431,7 +458,6 @@
       const isModifier = e.ctrlKey || e.metaKey;
 
       if (isModifier) {
-        // e.code гарантує коректну роботу в будь-якій розкладці (EN, UA тощо)
         if (e.code === 'KeyZ') {
           e.preventDefault();
           if (e.shiftKey) {
@@ -447,7 +473,7 @@
     });
 
     // ==========================================
-    //           ГОЛОВНА ЛОГІКА РЕДАКТОРА
+    //           ГОЛОВНА ЛОГІКА
     // ==========================================
     function getPreparedHtml(code) {
       const trimmed = code.trim();
@@ -495,6 +521,7 @@
       saveHistoryState();
     });
 
+    // Оновлена функція з чітким 50/50 центруванням
     function applyLayout(forceSide = false) {
       if (forceSide) isStacked = false;
 
@@ -502,9 +529,11 @@
         mainLayout.classList.add('layout-stacked');
         layoutBtn.textContent = 'Layout: Stacked';
         editorContainer.style.width = '100%';
+        editorContainer.style.height = '50%';
       } else {
         mainLayout.classList.remove('layout-stacked');
         layoutBtn.textContent = 'Layout: Side-by-Side';
+        editorContainer.style.width = '50%';
         editorContainer.style.height = '100%';
       }
       layoutBtn.disabled = !isDesktop;
@@ -638,7 +667,6 @@
       applyLayout();
     });
 
-    // Вставка табуляції (Tab)
     editor.addEventListener('keydown', (e) => {
       if (e.key === 'Tab') {
         e.preventDefault();
@@ -650,16 +678,6 @@
         renderPreview();
         saveHistoryState(true);
       }
-    });
-
-    // Кнопка Clear із можливістю відкотити назад
-    clearBtn.addEventListener('click', () => {
-      if (!editor.value) return;
-      saveHistoryState(true);
-      editor.value = '';
-      saveHistoryState(true);
-      renderPreview();
-      editor.focus();
     });
 
     applyLayout();
