@@ -19,6 +19,16 @@
       padding: 0;
     }
 
+    /* Стильний темний колір виділення тексту під дизайн */
+    ::selection {
+      background-color: #3f3f46;
+      color: #fafafa;
+    }
+    ::-moz-selection {
+      background-color: #3f3f46;
+      color: #fafafa;
+    }
+
     body {
       background-color: var(--bg);
       color: var(--text);
@@ -29,11 +39,22 @@
       overflow: hidden;
     }
 
-    /* Blocks selection only while dragging splitter */
-    body.is-resizing,
+    /* Повне блокування виділення тексту та курсорів при зміні розміру */
+    body.is-resizing {
+      cursor: col-resize !important;
+      user-select: none !important;
+      -webkit-user-select: none !important;
+    }
+    body.is-resizing.is-stacked-resizing {
+      cursor: row-resize !important;
+    }
     body.is-resizing * {
       user-select: none !important;
       -webkit-user-select: none !important;
+      pointer-events: none !important;
+    }
+    body.is-resizing .resizer {
+      pointer-events: auto !important;
     }
     body.is-resizing iframe {
       pointer-events: none !important;
@@ -133,18 +154,12 @@
       tab-size: 2;
     }
 
-    /* Тонка 1px лінія розділювача з комфортною зоною захоплення */
+    /* Тонка 1px лінія розділювача зі стабільним кольором (без підсвічування) */
     .resizer {
       background-color: var(--border);
       flex-shrink: 0;
       z-index: 20;
       position: relative;
-      transition: background-color 0.15s ease;
-    }
-
-    .resizer:hover,
-    body.is-resizing .resizer {
-      background-color: #3b82f6;
     }
 
     main:not(.layout-stacked) .resizer {
@@ -153,7 +168,6 @@
       cursor: col-resize;
     }
 
-    /* Невидима область натискання (8px) для горизонтального розділювача */
     main:not(.layout-stacked) .resizer::before {
       content: '';
       position: absolute;
@@ -171,7 +185,6 @@
       cursor: row-resize;
     }
 
-    /* Невидима область натискання (8px) для вертикального розділювача */
     main.layout-stacked .resizer::before {
       content: '';
       position: absolute;
@@ -521,7 +534,6 @@
       saveHistoryState();
     });
 
-    // Оновлена функція з чітким 50/50 центруванням
     function applyLayout(forceSide = false) {
       if (forceSide) isStacked = false;
 
@@ -596,19 +608,32 @@
       updateView();
     });
 
-    // Drag-ресайзер
+    // ==========================================
+    //           ПЕРЕТЯГУВАННЯ РОЗДІЛЮВАЧА
+    // ==========================================
     let isDragging = false;
 
     function stopDragging() {
       if (isDragging) {
         isDragging = false;
-        document.body.classList.remove('is-resizing');
+        document.body.classList.remove('is-resizing', 'is-stacked-resizing');
       }
     }
 
-    resizer.addEventListener('mousedown', () => {
+    resizer.addEventListener('mousedown', (e) => {
+      // Запобігаємо стандартному виділенню тексту браузером при кліку
+      e.preventDefault();
+      if (window.getSelection) {
+        window.getSelection().removeAllRanges();
+      }
+
       isDragging = true;
       document.body.classList.add('is-resizing');
+      if (isStacked && isDesktop) {
+        document.body.classList.add('is-stacked-resizing');
+      } else {
+        document.body.classList.remove('is-stacked-resizing');
+      }
     });
 
     window.addEventListener('mousemove', (e) => {
