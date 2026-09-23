@@ -235,7 +235,7 @@
       background: #09090b;
     }
 
-    /* --- Fullscreen Visualization Mode --- */
+    /* --- Абсолютно чистий Fullscreen без жодних рамок і зайвих елементів --- */
     .preview-pane:fullscreen {
       padding: 0 !important;
       margin: 0 !important;
@@ -258,36 +258,6 @@
     .preview-pane:fullscreen .device-notch {
       display: none !important;
     }
-
-    #exit-fullscreen-btn {
-      display: none;
-      position: absolute;
-      top: 14px;
-      right: 14px;
-      z-index: 999999;
-      background: rgba(24, 24, 27, 0.85);
-      border: 1px solid rgba(63, 63, 70, 0.7);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      color: #fafafa;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 11px;
-      letter-spacing: 0.5px;
-      font-family: inherit;
-      cursor: pointer;
-      opacity: 0.25;
-      transition: opacity 0.2s ease, transform 0.15s ease;
-    }
-
-    #exit-fullscreen-btn:hover {
-      opacity: 1;
-      transform: scale(1.03);
-    }
-
-    .preview-pane:fullscreen #exit-fullscreen-btn {
-      display: block;
-    }
   </style>
 </head>
 <body>
@@ -303,7 +273,7 @@
     </div>
 
     <div class="controls">
-      <!-- Fullscreen Button -->
+      <!-- Кнопка відкриття на весь екран -->
       <button class="btn" id="fullscreen-btn" title="View Fullscreen Without UI">⛶ Fullscreen</button>
       <button class="btn" id="layout-btn">Layout: Side-by-Side</button>
       <button class="btn" id="clear-btn">Clear</button>
@@ -318,9 +288,6 @@
     <div class="resizer" id="resizer"></div>
 
     <section class="preview-pane is-desktop" id="preview-container">
-      <!-- Button to exit fullscreen cleanly -->
-      <button id="exit-fullscreen-btn">✕ Exit Fullscreen (Esc)</button>
-
       <div class="device-scaler" id="scaler">
         <div class="device-wrapper" id="device">
           <div class="device-notch" id="notch"></div>
@@ -346,7 +313,6 @@
     const layoutBtn = document.getElementById('layout-btn');
     const clearBtn = document.getElementById('clear-btn');
     const fullscreenBtn = document.getElementById('fullscreen-btn');
-    const exitFullscreenBtn = document.getElementById('exit-fullscreen-btn');
 
     let isDesktop = true;
     let currentW = 393;
@@ -468,7 +434,7 @@
       }
     }
 
-    /* --- Fullscreen Handlers --- */
+    /* --- Повноекранний перехід (Вихід лише через Esc) --- */
     function toggleFullscreen() {
       if (!isDesktop) return;
 
@@ -484,22 +450,19 @@
     }
 
     fullscreenBtn.addEventListener('click', toggleFullscreen);
-    exitFullscreenBtn.addEventListener('click', () => {
-      if (document.fullscreenElement) {
+
+    // Додатково слухаємо Esc для гарантованого виходу з повного екрана
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.fullscreenElement) {
         document.exitFullscreen();
       }
     });
 
     document.addEventListener('fullscreenchange', () => {
-      if (document.fullscreenElement) {
-        fullscreenBtn.textContent = '✕ Exit Fullscreen';
-      } else {
-        fullscreenBtn.textContent = '⛶ Fullscreen';
-      }
       updateView();
     });
 
-    // Resizing logic with failsafes
+    // Drag-ресайзер
     let isDragging = false;
 
     function stopDragging() {
