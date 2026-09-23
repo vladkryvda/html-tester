@@ -9,7 +9,9 @@
       --bg: #09090b;
       --surface: #121215;
       --border: #27272a;
-      --text: #a1a1aa;
+      --border-subtle: #1c1c20;
+      --text: #71717a;
+      --text-hover: #a1a1aa;
       --text-active: #fafafa;
     }
 
@@ -19,7 +21,6 @@
       padding: 0;
     }
 
-    /* Стильний темний колір виділення тексту під дизайн */
     ::selection {
       background-color: #3f3f46;
       color: #fafafa;
@@ -39,7 +40,7 @@
       overflow: hidden;
     }
 
-    /* Повне блокування виділення тексту та курсорів при зміні розміру */
+    /* Блокування виділення та подій миші під час зміни розміру */
     body.is-resizing {
       cursor: col-resize !important;
       user-select: none !important;
@@ -60,64 +61,197 @@
       pointer-events: none !important;
     }
 
+    /* ==========================================
+       ВЕРХНЄ МЕНЮ (МІНІМАЛІЗМ / МОНОХРОМ)
+    ========================================== */
     header {
-      height: 48px;
+      height: 40px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 16px;
-      background: var(--surface);
-      font-size: 13px;
+      padding: 0 10px;
+      background: var(--bg);
       flex-shrink: 0;
+      z-index: 10;
     }
 
-    .controls {
+    /* Секція мінімалістичних вкладок */
+    .tabs-wrapper {
       display: flex;
-      gap: 6px;
       align-items: center;
+      gap: 4px;
+      height: 100%;
     }
 
-    .btn {
-      background: #18181b;
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 5px 10px;
+    #tabs-container {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tab {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 22px;
+      min-width: 22px;
+      padding: 0 6px;
       border-radius: 4px;
-      font-size: 12px;
-      font-family: inherit;
+      font-family: "JetBrains Mono", Consolas, monospace;
+      font-size: 11px;
+      color: var(--text);
+      background: transparent;
+      border: 1px solid var(--border);
       cursor: pointer;
-      transition: all 0.15s ease;
-      white-space: nowrap;
+      transition: all 0.12s ease;
+      user-select: none;
     }
 
-    .btn:hover:not(:disabled) {
+    .tab:hover {
+      color: var(--text-hover);
+      background: var(--surface);
+    }
+
+    .tab.active {
       color: var(--text-active);
+      background: #18181b;
       border-color: #3f3f46;
     }
 
-    .btn.active {
-      background: #27272a;
-      color: var(--text-active);
-      border-color: #52525b;
+    .tab-close {
+      display: none;
+      margin-left: 4px;
+      font-size: 12px;
+      line-height: 1;
+      color: #71717a;
+      cursor: pointer;
     }
 
-    .btn:disabled {
-      opacity: 0.3;
+    .tab:hover .tab-close {
+      display: inline-block;
+    }
+
+    .tab-close:hover {
+      color: var(--text-active);
+    }
+
+    .btn-add-tab {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: #52525b;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-add-tab:hover {
+      color: var(--text-active);
+      background: #18181b;
+      border-color: var(--border);
+    }
+
+    /* Секція векторних інструментів */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .segmented-control {
+      display: flex;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px;
+      gap: 1px;
+    }
+
+    .icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 24px;
+      background: transparent;
+      border: none;
+      border-radius: 3px;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.12s ease;
+      outline: none;
+    }
+
+    .icon-btn:hover:not(:disabled) {
+      color: var(--text-active);
+      background: #18181b;
+    }
+
+    .icon-btn.active {
+      color: var(--text-active);
+      background: #27272a;
+    }
+
+    .icon-btn:disabled {
+      opacity: 0.2;
       cursor: not-allowed;
+    }
+
+    .device-select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-hover);
+      font-size: 11px;
+      height: 26px;
+      border-radius: 4px;
+      padding: 0 6px;
+      outline: none;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.12s ease;
+      display: none;
+    }
+
+    .device-select:hover {
+      border-color: #3f3f46;
+      color: var(--text-active);
+    }
+
+    .device-select option {
+      background: #121215;
+      color: var(--text-active);
+    }
+
+    .divider {
+      width: 1px;
+      height: 14px;
+      background: var(--border);
+      margin: 0 3px;
     }
 
     .dim-label {
       font-size: 11px;
-      color: #71717a;
-      font-family: monospace;
-      margin-left: 8px;
+      color: #52525b;
+      font-family: "JetBrains Mono", Consolas, monospace;
+      white-space: nowrap;
+      user-select: none;
+      padding: 0 2px;
     }
 
+    /* ==========================================
+       ОСНОВНА ОБЛАСТЬ РЕДАКТОРА ТА ПРЕВ'Ю
+    ========================================== */
     main {
       flex: 1;
       display: flex;
-      height: calc(100vh - 48px);
+      height: calc(100vh - 40px);
       overflow: hidden;
       flex-direction: row;
     }
@@ -139,7 +273,6 @@
       height: 50%;
     }
 
-    /* Монолітна мінімалістична обгортка редактора */
     .editor-wrapper {
       position: relative;
       flex: 1;
@@ -150,7 +283,7 @@
       overflow: hidden;
     }
 
-    /* Спокійна колонка номерів без загальної підсвітки */
+    /* «Примарні» номери рядків */
     .line-numbers {
       background: transparent;
       padding: 16px 6px 32px 14px;
@@ -170,13 +303,12 @@
     .line-num {
       height: 20px;
       line-height: 20px;
-      color: #3f3f46; /* стриманий графітовий колір */
+      color: #3f3f46;
       font-variant-numeric: tabular-nums;
       transition: color 0.12s ease;
       cursor: pointer;
     }
 
-    /* Підсвічується виключно той номер, на який навели мишку */
     .line-num:hover {
       color: var(--text-active);
     }
@@ -213,7 +345,6 @@
       scrollbar-color: #27272a transparent;
     }
 
-    /* Ультратонкі акуратні скролбари */
     textarea::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -232,7 +363,7 @@
       background: #27272a;
     }
 
-    /* Тонка 1px лінія розділювача зі стабільним кольором (без підсвічування) */
+    /* Тонка 1px лінія розділювача */
     .resizer {
       background-color: var(--border);
       flex-shrink: 0;
@@ -385,18 +516,73 @@
 <body>
 
   <header>
-    <div class="controls">
-      <button class="btn active" data-type="desktop">Desktop</button>
-      <button class="btn" data-type="mobile" data-w="375" data-h="812">iPhone 13 mini</button>
-      <button class="btn" data-type="mobile" data-w="393" data-h="852">iPhone 15/16 Pro</button>
-      <button class="btn" data-type="mobile" data-w="360" data-h="800">Android Base</button>
-      <button class="btn" id="rotate-btn" disabled>Rotate</button>
-      <span class="dim-label" id="dimensions-display">Desktop (Full Width)</span>
+    <!-- Вкладки (по дефолту при 1 вкладці лише делікатний плюс) -->
+    <div class="tabs-wrapper">
+      <div id="tabs-container"></div>
+      <button class="btn-add-tab" id="btn-add-tab" title="Нова вкладка">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      </button>
     </div>
 
-    <div class="controls">
-      <button class="btn" id="fullscreen-btn" title="View Fullscreen Without UI">⛶ Fullscreen</button>
-      <button class="btn" id="layout-btn">Layout: Side-by-Side</button>
+    <!-- Векторні мінімалістичні інструменти -->
+    <div class="header-actions">
+      <!-- Перемикач Desktop / Mobile -->
+      <div class="segmented-control">
+        <button class="icon-btn active" id="btn-mode-desktop" title="Desktop Mode">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+          </svg>
+        </button>
+        <button class="icon-btn" id="btn-mode-mobile" title="Mobile Mode">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="2" width="14" height="20" rx="2.5"></rect>
+            <line x1="12" y1="18" x2="12.01" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Спадний список моделей смартфонів -->
+      <select class="device-select" id="device-select" title="Device Preset">
+        <option value="393x852">iPhone 15/16 Pro (393×852)</option>
+        <option value="375x812">iPhone 13 mini (375×812)</option>
+        <option value="360x800">Android Base (360×800)</option>
+        <option value="768x1024">iPad Mini (768×1024)</option>
+      </select>
+
+      <!-- Поворот екрана -->
+      <button class="icon-btn" id="rotate-btn" title="Rotate" disabled>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.9 1 6.7 2.6L21 8"></path>
+          <polyline points="21 3 21 8 16 8"></polyline>
+        </svg>
+      </button>
+
+      <div class="divider"></div>
+
+      <!-- Розміри -->
+      <span class="dim-label" id="dimensions-display">Desktop</span>
+
+      <div class="divider"></div>
+
+      <!-- Зміна розташування (Side / Stacked) -->
+      <button class="icon-btn" id="layout-btn" title="Toggle Layout">
+        <svg id="layout-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+          <line x1="12" y1="3" x2="12" y2="21"></line>
+        </svg>
+      </button>
+
+      <!-- Повноекранний режим -->
+      <button class="icon-btn" id="fullscreen-btn" title="Fullscreen">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+        </svg>
+      </button>
     </div>
   </header>
 
@@ -421,6 +607,9 @@
   </main>
 
   <script>
+    // ==========================================
+    //           ЕЛЕМЕНТИ DOM ТА ЗМІННІ
+    // ==========================================
     const mainLayout = document.getElementById('main-layout');
     const editorContainer = document.getElementById('editor-container');
     const editor = document.getElementById('code-input');
@@ -432,9 +621,15 @@
     const previewContainer = document.getElementById('preview-container');
     const dimDisplay = document.getElementById('dimensions-display');
     const notch = document.getElementById('notch');
-    const modeBtns = document.querySelectorAll('[data-type]');
+
+    const tabsContainer = document.getElementById('tabs-container');
+    const btnAddTab = document.getElementById('btn-add-tab');
+    const btnModeDesktop = document.getElementById('btn-mode-desktop');
+    const btnModeMobile = document.getElementById('btn-mode-mobile');
+    const deviceSelect = document.getElementById('device-select');
     const rotateBtn = document.getElementById('rotate-btn');
     const layoutBtn = document.getElementById('layout-btn');
+    const layoutIcon = document.getElementById('layout-icon');
     const fullscreenBtn = document.getElementById('fullscreen-btn');
 
     let isDesktop = true;
@@ -460,7 +655,157 @@
 <body></body>
 </html>`;
 
-    editor.value = localStorage.getItem('sim_code_clean') || '';
+    // ==========================================
+    //           СИСТЕМА ВКЛАДОК (TABS)
+    // ==========================================
+    let tabs = [];
+    let activeTabId = null;
+
+    function initTabs() {
+      const savedTabs = localStorage.getItem('sim_tabs_v2');
+      const savedActiveId = localStorage.getItem('sim_active_tab_v2');
+
+      if (savedTabs) {
+        try {
+          tabs = JSON.parse(savedTabs);
+        } catch (e) {
+          tabs = [];
+        }
+      }
+
+      if (!tabs || tabs.length === 0) {
+        const legacyCode = localStorage.getItem('sim_code_clean') || '';
+        tabs = [
+          {
+            id: 'tab_1',
+            code: legacyCode,
+            history: [{ value: legacyCode, selStart: 0, selEnd: 0 }],
+            historyIndex: 0
+          }
+        ];
+      }
+
+      activeTabId = savedActiveId && tabs.some(t => t.id === savedActiveId)
+        ? savedActiveId
+        : tabs[0].id;
+
+      renderTabs();
+      loadTabContent(activeTabId);
+    }
+
+    function getActiveTab() {
+      return tabs.find(t => t.id === activeTabId) || tabs[0];
+    }
+
+    function saveTabsToStorage() {
+      localStorage.setItem('sim_tabs_v2', JSON.stringify(tabs));
+      localStorage.setItem('sim_active_tab_v2', activeTabId);
+    }
+
+    function renderTabs() {
+      tabsContainer.innerHTML = '';
+
+      // Якщо тільки одна вкладка — нічого зайвого не показуємо
+      if (tabs.length <= 1) return;
+
+      tabs.forEach((tab, index) => {
+        const tabEl = document.createElement('div');
+        tabEl.className = `tab ${tab.id === activeTabId ? 'active' : ''}`;
+        tabEl.title = `Вкладка ${index + 1}`;
+
+        const numSpan = document.createElement('span');
+        numSpan.textContent = index + 1;
+
+        const closeBtn = document.createElement('span');
+        closeBtn.className = 'tab-close';
+        closeBtn.innerHTML = '&times;';
+        closeBtn.title = 'Закрити';
+
+        closeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          closeTab(tab.id);
+        });
+
+        tabEl.appendChild(numSpan);
+        tabEl.appendChild(closeBtn);
+
+        tabEl.addEventListener('click', () => {
+          switchTab(tab.id);
+        });
+
+        tabsContainer.appendChild(tabEl);
+      });
+    }
+
+    function switchTab(newTabId) {
+      if (newTabId === activeTabId) return;
+
+      const currentTab = getActiveTab();
+      if (currentTab) {
+        currentTab.code = editor.value;
+        currentTab.history = history;
+        currentTab.historyIndex = historyIndex;
+        currentTab.selStart = editor.selectionStart;
+        currentTab.selEnd = editor.selectionEnd;
+      }
+
+      activeTabId = newTabId;
+      renderTabs();
+      loadTabContent(newTabId);
+      saveTabsToStorage();
+    }
+
+    function loadTabContent(tabId) {
+      const tab = tabs.find(t => t.id === tabId) || tabs[0];
+      editor.value = tab.code || '';
+
+      history = tab.history && tab.history.length > 0 ? tab.history : [{
+        value: editor.value,
+        selStart: 0,
+        selEnd: 0
+      }];
+      historyIndex = typeof tab.historyIndex === 'number' ? tab.historyIndex : 0;
+
+      renderPreview();
+      updateLineNumbers();
+
+      if (typeof tab.selStart === 'number') {
+        editor.setSelectionRange(tab.selStart, tab.selEnd);
+      }
+    }
+
+    function createNewTab() {
+      const newId = 'tab_' + Date.now();
+      const newTab = {
+        id: newId,
+        code: '',
+        history: [{ value: '', selStart: 0, selEnd: 0 }],
+        historyIndex: 0
+      };
+      tabs.push(newTab);
+      switchTab(newId);
+      saveTabsToStorage();
+    }
+
+    function closeTab(tabId) {
+      if (tabs.length <= 1) return;
+
+      const index = tabs.findIndex(t => t.id === tabId);
+      if (index === -1) return;
+
+      tabs.splice(index, 1);
+
+      if (activeTabId === tabId) {
+        const nextIndex = Math.max(0, index - 1);
+        activeTabId = tabs[nextIndex].id;
+        loadTabContent(activeTabId);
+      }
+
+      renderTabs();
+      saveTabsToStorage();
+    }
+
+    btnAddTab.addEventListener('click', createNewTab);
 
     // ==========================================
     //           СИСТЕМА НОМЕРІВ РЯДКІВ
@@ -504,18 +849,15 @@
       lineNumbers.scrollTop = editor.scrollTop;
     }
 
-    // Синхронізація вертикального скролінгу
     editor.addEventListener('scroll', () => {
       lineNumbers.scrollTop = editor.scrollTop;
     });
 
-    // Підтримка скролінгу коліщатком над панеллю номерів
     lineNumbers.addEventListener('wheel', (e) => {
       editor.scrollTop += e.deltaY;
       e.preventDefault();
     }, { passive: false });
 
-    // Клік по номеру переносить курсор
     lineNumbers.addEventListener('click', (e) => {
       const target = e.target.closest('.line-num');
       if (!target) return;
@@ -537,11 +879,7 @@
     // ==========================================
     //           СИСТЕМА UNDO / REDO
     // ==========================================
-    let history = [{
-      value: editor.value,
-      selStart: editor.selectionStart,
-      selEnd: editor.selectionEnd
-    }];
+    let history = [{ value: '', selStart: 0, selEnd: 0 }];
     let historyIndex = 0;
     let isApplyingHistory = false;
     let historyDebounceTimer = null;
@@ -569,6 +907,11 @@
         } else {
           historyIndex++;
         }
+        const curTab = getActiveTab();
+        if (curTab) {
+          curTab.history = history;
+          curTab.historyIndex = historyIndex;
+        }
       };
 
       clearTimeout(historyDebounceTimer);
@@ -583,16 +926,18 @@
       if (!state) return;
       isApplyingHistory = true;
       editor.value = state.value;
+      const curTab = getActiveTab();
+      if (curTab) curTab.code = state.value;
       renderPreview();
       updateLineNumbers();
       editor.focus();
       editor.setSelectionRange(state.selStart, state.selEnd);
       isApplyingHistory = false;
+      saveTabsToStorage();
     }
 
     function undo() {
       clearTimeout(historyDebounceTimer);
-
       if (history[historyIndex] && editor.value !== history[historyIndex].value) {
         history = history.slice(0, historyIndex + 1);
         history.push({
@@ -624,15 +969,10 @@
       }
 
       const isModifier = e.ctrlKey || e.metaKey;
-
       if (isModifier) {
         if (e.code === 'KeyZ') {
           e.preventDefault();
-          if (e.shiftKey) {
-            redo();
-          } else {
-            undo();
-          }
+          if (e.shiftKey) redo(); else undo();
         } else if (e.code === 'KeyY') {
           e.preventDefault();
           redo();
@@ -641,7 +981,7 @@
     });
 
     // ==========================================
-    //           ГОЛОВНА ЛОГІКА
+    //           ГОЛОВНА ЛОГІКА РЕНДЕРУ
     // ==========================================
     function getPreparedHtml(code) {
       const trimmed = code.trim();
@@ -681,28 +1021,39 @@
 
     function renderPreview() {
       iframe.srcdoc = getPreparedHtml(editor.value);
-      localStorage.setItem('sim_code_clean', editor.value);
     }
 
     editor.addEventListener('input', () => {
+      const curTab = getActiveTab();
+      if (curTab) curTab.code = editor.value;
       renderPreview();
       saveHistoryState();
       updateLineNumbers();
+      saveTabsToStorage();
     });
 
+    // ==========================================
+    //           LAYOUT & VIEWPORT CONTROLS
+    // ==========================================
     function applyLayout(forceSide = false) {
       if (forceSide) isStacked = false;
 
       if (isStacked && isDesktop) {
         mainLayout.classList.add('layout-stacked');
-        layoutBtn.textContent = 'Layout: Stacked';
         editorContainer.style.width = '100%';
         editorContainer.style.height = '50%';
+        layoutIcon.innerHTML = `
+          <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+        `;
       } else {
         mainLayout.classList.remove('layout-stacked');
-        layoutBtn.textContent = 'Layout: Side-by-Side';
         editorContainer.style.width = '50%';
         editorContainer.style.height = '100%';
+        layoutIcon.innerHTML = `
+          <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+          <line x1="12" y1="3" x2="12" y2="21"></line>
+        `;
       }
       layoutBtn.disabled = !isDesktop;
       fullscreenBtn.disabled = !isDesktop;
@@ -715,13 +1066,15 @@
         rotateBtn.disabled = true;
         rotateBtn.classList.remove('active');
         isLandscape = false;
+        deviceSelect.style.display = 'none';
 
         const w = previewContainer.clientWidth;
         const h = previewContainer.clientHeight;
-        dimDisplay.textContent = `Desktop (${w} × ${h} px)`;
+        dimDisplay.textContent = `Desktop (${w} × ${h})`;
       } else {
         previewContainer.classList.remove('is-desktop');
         rotateBtn.disabled = false;
+        deviceSelect.style.display = 'inline-block';
 
         const w = isLandscape ? currentH : currentW;
         const h = isLandscape ? currentW : currentH;
@@ -740,98 +1093,32 @@
 
         scaler.style.transform = `scale(${scale})`;
         const pct = Math.round(scale * 100);
-        dimDisplay.textContent = `${w} × ${h} px (${pct}%)`;
+        dimDisplay.textContent = `${w} × ${h} (${pct}%)`;
       }
     }
 
-    function toggleFullscreen() {
-      if (!isDesktop) return;
+    btnModeDesktop.addEventListener('click', () => {
+      isDesktop = true;
+      btnModeDesktop.classList.add('active');
+      btnModeMobile.classList.remove('active');
+      applyLayout();
+    });
 
-      if (!document.fullscreenElement) {
-        previewContainer.requestFullscreen().catch(err => {
-          console.warn(`Fullscreen error: ${err.message}`);
-        });
-      } else {
-        document.exitFullscreen().catch(err => {
-          console.warn(`Exit fullscreen error: ${err.message}`);
-        });
-      }
-    }
+    btnModeMobile.addEventListener('click', () => {
+      isDesktop = false;
+      btnModeMobile.classList.add('active');
+      btnModeDesktop.classList.remove('active');
+      const [w, h] = deviceSelect.value.split('x').map(Number);
+      currentW = w;
+      currentH = h;
+      applyLayout(true);
+    });
 
-    fullscreenBtn.addEventListener('click', toggleFullscreen);
-
-    document.addEventListener('fullscreenchange', () => {
+    deviceSelect.addEventListener('change', () => {
+      const [w, h] = deviceSelect.value.split('x').map(Number);
+      currentW = w;
+      currentH = h;
       updateView();
-    });
-
-    // ==========================================
-    //           ПЕРЕТЯГУВАННЯ РОЗДІЛЮВАЧА
-    // ==========================================
-    let isDragging = false;
-
-    function stopDragging() {
-      if (isDragging) {
-        isDragging = false;
-        document.body.classList.remove('is-resizing', 'is-stacked-resizing');
-      }
-    }
-
-    resizer.addEventListener('mousedown', (e) => {
-      e.preventDefault();
-      if (window.getSelection) {
-        window.getSelection().removeAllRanges();
-      }
-
-      isDragging = true;
-      document.body.classList.add('is-resizing');
-      if (isStacked && isDesktop) {
-        document.body.classList.add('is-stacked-resizing');
-      } else {
-        document.body.classList.remove('is-stacked-resizing');
-      }
-    });
-
-    window.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
-
-      if (isStacked && isDesktop) {
-        const headerH = 48;
-        const totalH = window.innerHeight - headerH;
-        let percentage = ((e.clientY - headerH) / totalH) * 100;
-        percentage = Math.max(15, Math.min(85, percentage));
-        editorContainer.style.height = `${percentage}%`;
-      } else {
-        let percentage = (e.clientX / window.innerWidth) * 100;
-        percentage = Math.max(15, Math.min(85, percentage));
-        editorContainer.style.width = `${percentage}%`;
-      }
-      updateView();
-    });
-
-    window.addEventListener('mouseup', stopDragging);
-    window.addEventListener('blur', stopDragging);
-
-    const resizeObserver = new ResizeObserver(() => {
-      updateView();
-    });
-    resizeObserver.observe(previewContainer);
-
-    modeBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        modeBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-
-        if (btn.dataset.type === 'desktop') {
-          isDesktop = true;
-          applyLayout();
-        } else {
-          isDesktop = false;
-          currentW = parseInt(btn.dataset.w);
-          currentH = parseInt(btn.dataset.h);
-          applyLayout(true);
-        }
-        updateView();
-      });
     });
 
     rotateBtn.addEventListener('click', () => {
@@ -847,6 +1134,64 @@
       applyLayout();
     });
 
+    fullscreenBtn.addEventListener('click', () => {
+      if (!isDesktop) return;
+      if (!document.fullscreenElement) {
+        previewContainer.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    });
+
+    document.addEventListener('fullscreenchange', updateView);
+
+    // ==========================================
+    //           RESIZER (ЗМІНА РОЗМІРУ)
+    // ==========================================
+    let isDragging = false;
+
+    function stopDragging() {
+      if (isDragging) {
+        isDragging = false;
+        document.body.classList.remove('is-resizing', 'is-stacked-resizing');
+      }
+    }
+
+    resizer.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      if (window.getSelection) window.getSelection().removeAllRanges();
+      isDragging = true;
+      document.body.classList.add('is-resizing');
+      if (isStacked && isDesktop) {
+        document.body.classList.add('is-stacked-resizing');
+      } else {
+        document.body.classList.remove('is-stacked-resizing');
+      }
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const headerH = 40;
+      if (isStacked && isDesktop) {
+        const totalH = window.innerHeight - headerH;
+        let percentage = ((e.clientY - headerH) / totalH) * 100;
+        percentage = Math.max(15, Math.min(85, percentage));
+        editorContainer.style.height = `${percentage}%`;
+      } else {
+        let percentage = (e.clientX / window.innerWidth) * 100;
+        percentage = Math.max(15, Math.min(85, percentage));
+        editorContainer.style.width = `${percentage}%`;
+      }
+      updateView();
+    });
+
+    window.addEventListener('mouseup', stopDragging);
+    window.addEventListener('blur', stopDragging);
+
+    const resizeObserver = new ResizeObserver(updateView);
+    resizeObserver.observe(previewContainer);
+
+    // Tab key 2 пробіли
     editor.addEventListener('keydown', (e) => {
       if (e.key === 'Tab') {
         e.preventDefault();
@@ -858,12 +1203,15 @@
         renderPreview();
         updateLineNumbers();
         saveHistoryState(true);
+        const curTab = getActiveTab();
+        if (curTab) curTab.code = editor.value;
+        saveTabsToStorage();
       }
     });
 
+    // Початкова ініціалізація
+    initTabs();
     applyLayout();
-    renderPreview();
-    updateLineNumbers();
   </script>
 </body>
 </html>
