@@ -8,8 +8,9 @@
     :root {
       --bg: #09090b;
       --surface: #121215;
-      --border: #27272a;
-      --border-subtle: #1c1c20;
+      --surface-elevated: #18181c;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.15);
       --text: #71717a;
       --text-hover: #a1a1aa;
       --text-active: #fafafa;
@@ -33,14 +34,17 @@
     body {
       background-color: var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
       height: 100vh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
 
-    /* Блокування виділення та подій миші під час зміни розміру */
+    /* Блокування виділення та подій під час зміни розміру */
     body.is-resizing {
       cursor: col-resize !important;
       user-select: none !important;
@@ -62,61 +66,70 @@
     }
 
     /* ==========================================
-       ВЕРХНЄ МЕНЮ (МІНІМАЛІЗМ / МОНОХРОМ)
+       СКЛЯНЕ ВЕРХНЄ МЕНЮ (FROSTED GLASS & BEVEL)
     ========================================== */
     header {
-      height: 40px;
+      height: 42px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 10px;
-      background: var(--bg);
+      padding: 0 12px;
+      background: rgba(9, 9, 11, 0.8);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: inset 0 -1px 0 0 rgba(255, 255, 255, 0.02);
       flex-shrink: 0;
-      z-index: 10;
+      z-index: 30;
     }
 
     /* Секція мінімалістичних вкладок */
     .tabs-wrapper {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       height: 100%;
     }
 
     #tabs-container {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
     }
 
     .tab {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      height: 22px;
-      min-width: 22px;
-      padding: 0 6px;
-      border-radius: 4px;
+      height: 24px;
+      min-width: 24px;
+      padding: 0 7px;
+      border-radius: 5px;
       font-family: "JetBrains Mono", Consolas, monospace;
       font-size: 11px;
       color: var(--text);
       background: transparent;
       border: 1px solid var(--border);
       cursor: pointer;
-      transition: all 0.12s ease;
+      transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
       user-select: none;
     }
 
     .tab:hover {
       color: var(--text-hover);
-      background: var(--surface);
+      background: rgba(255, 255, 255, 0.04);
+      border-color: var(--border-strong);
     }
 
     .tab.active {
       color: var(--text-active);
-      background: #18181b;
-      border-color: #3f3f46;
+      background: linear-gradient(180deg, #1c1c22 0%, #131317 100%);
+      border-color: var(--border-strong);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .tab:active {
+      transform: scale(0.95);
     }
 
     .tab-close {
@@ -126,6 +139,7 @@
       line-height: 1;
       color: #71717a;
       cursor: pointer;
+      transition: color 0.1s ease;
     }
 
     .tab:hover .tab-close {
@@ -140,38 +154,43 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 22px;
-      height: 22px;
-      border-radius: 4px;
+      width: 24px;
+      height: 24px;
+      border-radius: 5px;
       background: transparent;
       border: 1px solid transparent;
       color: #52525b;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .btn-add-tab:hover {
       color: var(--text-active);
-      background: #18181b;
+      background: rgba(255, 255, 255, 0.05);
       border-color: var(--border);
     }
 
-    /* Секція векторних інструментів */
+    .btn-add-tab:active {
+      transform: scale(0.92);
+    }
+
+    /* Інструменти меню */
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
       flex-shrink: 0;
     }
 
     .segmented-control {
       display: flex;
       align-items: center;
-      background: var(--surface);
+      background: #111114;
       border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 1px;
-      gap: 1px;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+      border-radius: 6px;
+      padding: 2px;
+      gap: 2px;
     }
 
     .icon-btn {
@@ -181,46 +200,53 @@
       width: 26px;
       height: 24px;
       background: transparent;
-      border: none;
-      border-radius: 3px;
+      border: 1px solid transparent;
+      border-radius: 4px;
       color: var(--text);
       cursor: pointer;
-      transition: all 0.12s ease;
+      transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
       outline: none;
     }
 
     .icon-btn:hover:not(:disabled) {
       color: var(--text-active);
-      background: #18181b;
+      background: rgba(255, 255, 255, 0.05);
     }
 
     .icon-btn.active {
       color: var(--text-active);
-      background: #27272a;
+      background: linear-gradient(180deg, #24242a 0%, #19191d 100%);
+      border-color: var(--border-strong);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+
+    .icon-btn:active:not(:disabled) {
+      transform: scale(0.94);
     }
 
     .icon-btn:disabled {
-      opacity: 0.2;
+      opacity: 0.25;
       cursor: not-allowed;
     }
 
     .device-select {
-      background: var(--surface);
+      background: linear-gradient(180deg, #18181c 0%, #121215 100%);
       border: 1px solid var(--border);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 1px 2px rgba(0,0,0,0.3);
       color: var(--text-hover);
       font-size: 11px;
-      height: 26px;
-      border-radius: 4px;
-      padding: 0 6px;
+      height: 28px;
+      border-radius: 6px;
+      padding: 0 8px;
       outline: none;
       font-family: inherit;
       cursor: pointer;
-      transition: all 0.12s ease;
+      transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
       display: none;
     }
 
     .device-select:hover {
-      border-color: #3f3f46;
+      border-color: var(--border-strong);
       color: var(--text-active);
     }
 
@@ -233,7 +259,7 @@
       width: 1px;
       height: 14px;
       background: var(--border);
-      margin: 0 3px;
+      margin: 0 4px;
     }
 
     .dim-label {
@@ -242,7 +268,8 @@
       font-family: "JetBrains Mono", Consolas, monospace;
       white-space: nowrap;
       user-select: none;
-      padding: 0 2px;
+      padding: 0 4px;
+      font-variant-numeric: tabular-nums;
     }
 
     /* ==========================================
@@ -251,7 +278,7 @@
     main {
       flex: 1;
       display: flex;
-      height: calc(100vh - 40px);
+      height: calc(100vh - 42px);
       overflow: hidden;
       flex-direction: row;
     }
@@ -363,12 +390,17 @@
       background: #27272a;
     }
 
-    /* Тонка 1px лінія розділювача */
+    /* Інженерна лінія розділювача */
     .resizer {
       background-color: var(--border);
       flex-shrink: 0;
       z-index: 20;
       position: relative;
+      transition: background-color 0.15s ease;
+    }
+
+    .resizer:hover, body.is-resizing .resizer {
+      background-color: var(--border-strong);
     }
 
     main:not(.layout-stacked) .resizer {
@@ -405,16 +437,28 @@
       z-index: 1;
     }
 
+    /* ==========================================
+       СТУДІЙНИЙ ФОН ПРЕВ'Ю (STUDIO BACKDROP)
+    ========================================== */
     .preview-pane {
       flex: 1;
       height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #09090b;
+      background-color: #070709;
       overflow: hidden;
       position: relative;
-      padding: 20px;
+      padding: 24px;
+    }
+
+    /* Делікатна інженерна сітка точок та м'яке студійне світло */
+    .preview-pane:not(.is-desktop) {
+      background-color: #070709;
+      background-image: 
+        radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+        radial-gradient(circle at 50% 50%, rgba(24, 24, 32, 0.45) 0%, transparent 80%);
+      background-size: 20px 20px, 100% 100%;
     }
 
     .device-scaler {
@@ -424,30 +468,54 @@
       transform-origin: center center;
     }
 
+    /* ==========================================
+       ТИТАНОВИЙ КОРПУС СМАРТФОНА (HARDWARE REALISM)
+    ========================================== */
     .device-wrapper {
       position: relative;
-      border: 2px solid #3f3f46;
-      border-radius: 44px;
+      border-radius: 50px;
       background: #000;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+      flex-shrink: 0;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      flex-shrink: 0;
+      /* Багатошарове металеве світло + глибокі м'які тіні */
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.14),             /* зовнішня мікрофаска */
+        0 0 0 3px #1c1c20,                                 /* матове ребро титану */
+        0 0 0 4.5px rgba(0, 0, 0, 0.9),                    /* внутрішній контур скла */
+        0 30px 70px -15px rgba(0, 0, 0, 0.95),             /* основна розсіяна тінь */
+        0 15px 30px -8px rgba(0, 0, 0, 0.7);               /* контактна тінь */
+      transition: box-shadow 0.25s ease, border-radius 0.25s ease;
     }
 
+    /* Dynamic Island зі скляним бліком */
     .device-notch {
       position: absolute;
-      top: 10px;
+      top: 11px;
       left: 50%;
       transform: translateX(-50%);
-      width: 90px;
-      height: 22px;
+      width: 88px;
+      height: 24px;
       background: #000;
-      border-radius: 14px;
-      z-index: 10;
-      border: 1px solid #1c1c1f;
+      border-radius: 20px;
+      z-index: 15;
       pointer-events: none;
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.07), 0 2px 6px rgba(0, 0, 0, 0.7);
+    }
+
+    /* Вічко фронтальної камери з відблиском лінзи */
+    .device-notch::after {
+      content: '';
+      position: absolute;
+      right: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #24243a 0%, #06060c 100%);
+      box-shadow: inset 0 0 1px 1px rgba(255, 255, 255, 0.12);
     }
 
     /* Повні права для 3D, Pointer Lock та повноекранного режиму */
@@ -457,7 +525,7 @@
       border: none;
       background: #09090b;
       color-scheme: dark;
-      border-radius: 42px;
+      border-radius: 46px;
       pointer-events: auto !important;
     }
 
@@ -475,10 +543,10 @@
     .is-desktop .device-wrapper {
       width: 100% !important;
       height: 100% !important;
-      border: none;
-      border-radius: 0;
-      box-shadow: none;
-      background: #09090b;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      background: transparent !important;
     }
 
     .is-desktop .device-notch {
@@ -591,7 +659,6 @@
       <div class="device-scaler" id="scaler">
         <div class="device-wrapper" id="device">
           <div class="device-notch" id="notch"></div>
-          <!-- ДОДАНО allow-pointer-lock ТА Permissions Policy ДЛЯ 3D ГОР -->
           <iframe id="viewport-frame" 
                   sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-forms allow-popups allow-modals allow-downloads"
                   allow="pointer-lock; fullscreen; accelerometer; gyroscope"
@@ -1027,7 +1094,7 @@
     editor.addEventListener('input', () => {
       const curTab = getActiveTab();
       if (curTab) curTab.code = editor.value;
-      schedulePreview(250); // Дебаунс для безпечного рендеру 3D сцен
+      schedulePreview(250);
       saveHistoryState();
       updateLineNumbers();
       saveTabsToStorage();
@@ -1084,8 +1151,8 @@
         device.style.height = `${h}px`;
         notch.style.display = isLandscape ? 'none' : 'block';
 
-        const availW = previewContainer.clientWidth - 40;
-        const availH = previewContainer.clientHeight - 40;
+        const availW = previewContainer.clientWidth - 48;
+        const availH = previewContainer.clientHeight - 48;
         const totalW = w + 4;
         const totalH = h + 4;
 
@@ -1172,7 +1239,7 @@
 
     window.addEventListener('mousemove', (e) => {
       if (!isDragging) return;
-      const headerH = 40;
+      const headerH = 42;
       if (isStacked && isDesktop) {
         const totalH = window.innerHeight - headerH;
         let percentage = ((e.clientY - headerH) / totalH) * 100;
