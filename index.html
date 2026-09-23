@@ -450,6 +450,7 @@
       pointer-events: none;
     }
 
+    /* Повні права для 3D, Pointer Lock та повноекранного режиму */
     iframe {
       width: 100%;
       height: 100%;
@@ -516,7 +517,6 @@
 <body>
 
   <header>
-    <!-- Вкладки (по дефолту при 1 вкладці лише делікатний плюс) -->
     <div class="tabs-wrapper">
       <div id="tabs-container"></div>
       <button class="btn-add-tab" id="btn-add-tab" title="Нова вкладка">
@@ -527,9 +527,7 @@
       </button>
     </div>
 
-    <!-- Векторні мінімалістичні інструменти -->
     <div class="header-actions">
-      <!-- Перемикач Desktop / Mobile -->
       <div class="segmented-control">
         <button class="icon-btn active" id="btn-mode-desktop" title="Desktop Mode">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -546,7 +544,6 @@
         </button>
       </div>
 
-      <!-- Спадний список моделей смартфонів -->
       <select class="device-select" id="device-select" title="Device Preset">
         <option value="393x852">iPhone 15/16 Pro (393×852)</option>
         <option value="375x812">iPhone 13 mini (375×812)</option>
@@ -554,7 +551,6 @@
         <option value="768x1024">iPad Mini (768×1024)</option>
       </select>
 
-      <!-- Поворот екрана -->
       <button class="icon-btn" id="rotate-btn" title="Rotate" disabled>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.9 1 6.7 2.6L21 8"></path>
@@ -563,13 +559,9 @@
       </button>
 
       <div class="divider"></div>
-
-      <!-- Розміри -->
       <span class="dim-label" id="dimensions-display">Desktop</span>
-
       <div class="divider"></div>
 
-      <!-- Зміна розташування (Side / Stacked) -->
       <button class="icon-btn" id="layout-btn" title="Toggle Layout">
         <svg id="layout-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="3" width="18" height="18" rx="2"></rect>
@@ -577,7 +569,6 @@
         </svg>
       </button>
 
-      <!-- Повноекранний режим -->
       <button class="icon-btn" id="fullscreen-btn" title="Fullscreen">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
@@ -600,16 +591,17 @@
       <div class="device-scaler" id="scaler">
         <div class="device-wrapper" id="device">
           <div class="device-notch" id="notch"></div>
-          <iframe id="viewport-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"></iframe>
+          <!-- ДОДАНО allow-pointer-lock ТА Permissions Policy ДЛЯ 3D ГОР -->
+          <iframe id="viewport-frame" 
+                  sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-forms allow-popups allow-modals allow-downloads"
+                  allow="pointer-lock; fullscreen; accelerometer; gyroscope"
+                  allowfullscreen="true"></iframe>
         </div>
       </div>
     </section>
   </main>
 
   <script>
-    // ==========================================
-    //           ЕЛЕМЕНТИ DOM ТА ЗМІННІ
-    // ==========================================
     const mainLayout = document.getElementById('main-layout');
     const editorContainer = document.getElementById('editor-container');
     const editor = document.getElementById('code-input');
@@ -698,14 +690,16 @@
     }
 
     function saveTabsToStorage() {
-      localStorage.setItem('sim_tabs_v2', JSON.stringify(tabs));
-      localStorage.setItem('sim_active_tab_v2', activeTabId);
+      try {
+        localStorage.setItem('sim_tabs_v2', JSON.stringify(tabs));
+        localStorage.setItem('sim_active_tab_v2', activeTabId);
+      } catch (err) {
+        console.warn('Storage limit reached:', err);
+      }
     }
 
     function renderTabs() {
       tabsContainer.innerHTML = '';
-
-      // Якщо тільки одна вкладка — нічого зайвого не показуємо
       if (tabs.length <= 1) return;
 
       tabs.forEach((tab, index) => {
@@ -928,7 +922,7 @@
       editor.value = state.value;
       const curTab = getActiveTab();
       if (curTab) curTab.code = state.value;
-      renderPreview();
+      schedulePreview(0);
       updateLineNumbers();
       editor.focus();
       editor.setSelectionRange(state.selStart, state.selEnd);
@@ -981,8 +975,10 @@
     });
 
     // ==========================================
-    //           ГОЛОВНА ЛОГІКА РЕНДЕРУ
+    //           ГОЛОВНА ЛОГІКА РЕНДЕРУ (З ДЕБАУНСОМ)
     // ==========================================
+    let renderTimer = null;
+
     function getPreparedHtml(code) {
       const trimmed = code.trim();
       if (!trimmed) return EMPTY_DARK_TEMPLATE;
@@ -1023,10 +1019,15 @@
       iframe.srcdoc = getPreparedHtml(editor.value);
     }
 
+    function schedulePreview(delay = 250) {
+      clearTimeout(renderTimer);
+      renderTimer = setTimeout(renderPreview, delay);
+    }
+
     editor.addEventListener('input', () => {
       const curTab = getActiveTab();
       if (curTab) curTab.code = editor.value;
-      renderPreview();
+      schedulePreview(250); // Дебаунс для безпечного рендеру 3D сцен
       saveHistoryState();
       updateLineNumbers();
       saveTabsToStorage();
@@ -1200,7 +1201,7 @@
         const end = editor.selectionEnd;
         editor.value = editor.value.substring(0, start) + '  ' + editor.value.substring(end);
         editor.selectionStart = editor.selectionEnd = start + 2;
-        renderPreview();
+        schedulePreview(0);
         updateLineNumbers();
         saveHistoryState(true);
         const curTab = getActiveTab();
