@@ -273,7 +273,6 @@
     </div>
 
     <div class="controls">
-      <!-- Кнопка відкриття на весь екран -->
       <button class="btn" id="fullscreen-btn" title="View Fullscreen Without UI">⛶ Fullscreen</button>
       <button class="btn" id="layout-btn">Layout: Side-by-Side</button>
       <button class="btn" id="clear-btn">Clear</button>
@@ -339,6 +338,117 @@
 
     editor.value = localStorage.getItem('sim_code_clean') || '';
 
+    // ==========================================
+    //           СИСТЕМА UNDO / REDO
+    // ==========================================
+    let history = [{
+      value: editor.value,
+      selStart: editor.selectionStart,
+      selEnd: editor.selectionEnd
+    }];
+    let historyIndex = 0;
+    let isApplyingHistory = false;
+    let historyDebounceTimer = null;
+
+    function saveHistoryState(immediate = false) {
+      if (isApplyingHistory) return;
+
+      const currentState = {
+        value: editor.value,
+        selStart: editor.selectionStart,
+        selEnd: editor.selectionEnd
+      };
+
+      if (history[historyIndex] && history[historyIndex].value === currentState.value) {
+        history[historyIndex].selStart = currentState.selStart;
+        history[historyIndex].selEnd = currentState.selEnd;
+        return;
+      }
+
+      const commit = () => {
+        history = history.slice(0, historyIndex + 1);
+        history.push(currentState);
+        if (history.length > 60) {
+          history.shift();
+        } else {
+          historyIndex++;
+        }
+      };
+
+      clearTimeout(historyDebounceTimer);
+      if (immediate) {
+        commit();
+      } else {
+        historyDebounceTimer = setTimeout(commit, 350);
+      }
+    }
+
+    function applyHistoryState(state) {
+      if (!state) return;
+      isApplyingHistory = true;
+      editor.value = state.value;
+      renderPreview();
+      editor.focus();
+      editor.setSelectionRange(state.selStart, state.selEnd);
+      isApplyingHistory = false;
+    }
+
+    function undo() {
+      clearTimeout(historyDebounceTimer);
+
+      // Якщо є незафіксовані зміни перед скасуванням — фіксуємо їх
+      if (history[historyIndex] && editor.value !== history[historyIndex].value) {
+        history = history.slice(0, historyIndex + 1);
+        history.push({
+          value: editor.value,
+          selStart: editor.selectionStart,
+          selEnd: editor.selectionEnd
+        });
+        historyIndex++;
+      }
+
+      if (historyIndex > 0) {
+        historyIndex--;
+        applyHistoryState(history[historyIndex]);
+      }
+    }
+
+    function redo() {
+      clearTimeout(historyDebounceTimer);
+      if (historyIndex < history.length - 1) {
+        historyIndex++;
+        applyHistoryState(history[historyIndex]);
+      }
+    }
+
+    // Слухач гарячих клавіш Ctrl+Z / Cmd+Z та Redo на рівні всього вікна
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.fullscreenElement) {
+        document.exitFullscreen();
+        return;
+      }
+
+      const isModifier = e.ctrlKey || e.metaKey;
+
+      if (isModifier) {
+        // e.code гарантує коректну роботу в будь-якій розкладці (EN, UA тощо)
+        if (e.code === 'KeyZ') {
+          e.preventDefault();
+          if (e.shiftKey) {
+            redo();
+          } else {
+            undo();
+          }
+        } else if (e.code === 'KeyY') {
+          e.preventDefault();
+          redo();
+        }
+      }
+    });
+
+    // ==========================================
+    //           ГОЛОВНА ЛОГІКА РЕДАКТОРА
+    // ==========================================
     function getPreparedHtml(code) {
       const trimmed = code.trim();
       if (!trimmed) return EMPTY_DARK_TEMPLATE;
@@ -380,7 +490,10 @@
       localStorage.setItem('sim_code_clean', editor.value);
     }
 
-    editor.addEventListener('input', renderPreview);
+    editor.addEventListener('input', () => {
+      renderPreview();
+      saveHistoryState();
+    });
 
     function applyLayout(forceSide = false) {
       if (forceSide) isStacked = false;
@@ -434,7 +547,6 @@
       }
     }
 
-    /* --- Повноекранний перехід (Вихід лише через Esc) --- */
     function toggleFullscreen() {
       if (!isDesktop) return;
 
@@ -450,13 +562,6 @@
     }
 
     fullscreenBtn.addEventListener('click', toggleFullscreen);
-
-    // Додатково слухаємо Esc для гарантованого виходу з повного екрана
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && document.fullscreenElement) {
-        document.exitFullscreen();
-      }
-    });
 
     document.addEventListener('fullscreenchange', () => {
       updateView();
@@ -533,20 +638,28 @@
       applyLayout();
     });
 
+    // Вставка табуляції (Tab)
     editor.addEventListener('keydown', (e) => {
       if (e.key === 'Tab') {
         e.preventDefault();
+        saveHistoryState(true);
         const start = editor.selectionStart;
         const end = editor.selectionEnd;
         editor.value = editor.value.substring(0, start) + '  ' + editor.value.substring(end);
         editor.selectionStart = editor.selectionEnd = start + 2;
         renderPreview();
+        saveHistoryState(true);
       }
     });
 
+    // Кнопка Clear із можливістю відкотити назад
     clearBtn.addEventListener('click', () => {
+      if (!editor.value) return;
+      saveHistoryState(true);
       editor.value = '';
+      saveHistoryState(true);
       renderPreview();
+      editor.focus();
     });
 
     applyLayout();
