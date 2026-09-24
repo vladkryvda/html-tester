@@ -85,7 +85,7 @@
     }
 
     /* ==========================================
-       ВКЛАДКИ ТА ДІЇ
+       НОВІ МІНІМАЛІСТИЧНІ ВКЛАДКИ (TABS)
     ========================================== */
     .tabs-wrapper {
       display: flex;
@@ -165,6 +165,7 @@
       outline: none;
     }
 
+    /* Хрестик закриття: стабільне позиціонування без стрибків ширини */
     .tab-close {
       display: inline-flex;
       align-items: center;
@@ -364,144 +365,6 @@
       display: flex;
       background: var(--bg);
       overflow: hidden;
-    }
-
-    /* ==========================================
-       МОНОХРОМНИЙ БАНЕР ДЛЯ ВИЯВЛЕНИХ ФАЙЛІВ
-    ========================================== */
-    .detected-files-banner {
-      position: absolute;
-      top: 12px;
-      right: 16px;
-      background: #141418;
-      border: 1px solid var(--border-strong);
-      box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-      border-radius: 7px;
-      padding: 6px 8px 6px 12px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      z-index: 25;
-      animation: bannerFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      user-select: none;
-      max-width: calc(100% - 32px);
-    }
-
-    @keyframes bannerFadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(-6px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .banner-icon {
-      color: #a1a1aa;
-      display: flex;
-      align-items: center;
-      flex-shrink: 0;
-    }
-
-    .banner-content {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-    .banner-content::-webkit-scrollbar {
-      display: none;
-    }
-
-    .banner-label {
-      color: var(--text);
-      white-space: nowrap;
-    }
-
-    .banner-tags {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .banner-file-chip {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 2px 7px;
-      font-family: "JetBrains Mono", Consolas, monospace;
-      font-size: 10.5px;
-      color: #d4d4d8;
-      cursor: pointer;
-      transition: all 0.12s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      white-space: nowrap;
-      outline: none;
-    }
-
-    .banner-file-chip:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: var(--border-strong);
-      color: #fafafa;
-    }
-
-    .banner-actions {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-      margin-left: 2px;
-    }
-
-    .banner-btn {
-      height: 22px;
-      padding: 0 8px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-family: inherit;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.12s ease;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .banner-btn.primary {
-      background: #24242a;
-      color: #fafafa;
-      border: 1px solid var(--border-strong);
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-    }
-
-    .banner-btn.primary:hover {
-      background: #2e2e36;
-      border-color: rgba(255, 255, 255, 0.25);
-    }
-
-    .banner-btn-close {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 20px;
-      height: 20px;
-      border-radius: 4px;
-      background: transparent;
-      border: none;
-      color: var(--text);
-      cursor: pointer;
-      transition: all 0.12s ease;
-    }
-
-    .banner-btn-close:hover {
-      color: var(--text-active);
-      background: rgba(255, 255, 255, 0.08);
     }
 
     .line-numbers {
@@ -841,30 +704,7 @@
     <section class="editor-pane" id="editor-container">
       <div class="editor-wrapper">
         <div class="line-numbers" id="line-numbers" aria-hidden="true"></div>
-        <textarea id="code-input" spellcheck="false" wrap="off" placeholder="Paste your HTML/CSS/JS/JSON code here..."></textarea>
-
-        <!-- Монохромний банер виявлених файлів -->
-        <div class="detected-files-banner" id="detected-files-banner" style="display: none;">
-          <div class="banner-icon">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-            </svg>
-          </div>
-          <div class="banner-content">
-            <span class="banner-label">Пов'язані файли:</span>
-            <div class="banner-tags" id="banner-tags"></div>
-          </div>
-          <div class="banner-actions">
-            <button class="banner-btn primary" id="btn-create-all-tabs">Створити всі</button>
-            <button class="banner-btn-close" id="btn-close-banner" title="Сховати">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
-          </div>
-        </div>
+        <textarea id="code-input" spellcheck="false" wrap="off" placeholder="Paste your HTML/CSS code here..."></textarea>
       </div>
     </section>
 
@@ -907,19 +747,11 @@
     const layoutIcon = document.getElementById('layout-icon');
     const fullscreenBtn = document.getElementById('fullscreen-btn');
 
-    // Банер файлів
-    const bannerEl = document.getElementById('detected-files-banner');
-    const bannerTags = document.getElementById('banner-tags');
-    const btnCreateAllTabs = document.getElementById('btn-create-all-tabs');
-    const btnCloseBanner = document.getElementById('btn-close-banner');
-
     let isDesktop = true;
     let currentW = 393;
     let currentH = 852;
     let isLandscape = false;
     let isStacked = false;
-    let bannerDismissTimer = null;
-    let pendingFilesToCreate = [];
 
     const EMPTY_DARK_TEMPLATE = `<!DOCTYPE html>
 <html>
@@ -937,14 +769,6 @@
 </head>
 <body></body>
 </html>`;
-
-    function escapeRegExp(string) {
-      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
-
-    function escapeHtml(str) {
-      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
 
     // ==========================================
     //           СИСТЕМА ВКЛАДОК ТА UNDO
@@ -1020,6 +844,7 @@
       }
     }
 
+    // Розумне визначення назви: без цифр
     function getTabTitle(tab) {
       if (tab.customTitle && tab.customTitle.trim()) {
         return tab.customTitle.trim();
@@ -1054,6 +879,7 @@
         titleSpan.textContent = titleText;
         tabEl.appendChild(titleSpan);
 
+        // Хрестик доступний, якщо є більше 1 вкладки
         if (tabs.length > 1) {
           const closeBtn = document.createElement('span');
           closeBtn.className = 'tab-close';
@@ -1077,6 +903,7 @@
           switchTab(tab.id);
         });
 
+        // Закриття середньою кнопкою миші (коліщатком)
         tabEl.addEventListener('auxclick', (e) => {
           if (e.button === 1 && tabs.length > 1) {
             e.preventDefault();
@@ -1084,6 +911,7 @@
           }
         });
 
+        // Подвійний клік для швидкого перейменування
         tabEl.addEventListener('dblclick', (e) => {
           if (e.target.closest('.tab-close')) return;
           startRenameTab(tab.id);
@@ -1179,19 +1007,18 @@
       }
     }
 
-    function createNewTab(customTitle = null, initialContent = '') {
-      const newId = 'tab_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+    function createNewTab() {
+      const newId = 'tab_' + Date.now();
       const newTab = {
         id: newId,
-        customTitle: customTitle,
-        code: initialContent,
-        history: [{ value: initialContent, selStart: initialContent.length, selEnd: initialContent.length }],
+        customTitle: null,
+        code: '',
+        history: [{ value: '', selStart: 0, selEnd: 0 }],
         historyIndex: 0
       };
       tabs.push(newTab);
       switchTab(newId);
       saveTabsToStorage();
-      return newTab;
     }
 
     function closeTab(tabId) {
@@ -1207,6 +1034,7 @@
         tabToClose.historyIndex = historyIndex;
       }
 
+      // Зберігаємо у стек відновлення
       closedTabs.push({
         tab: JSON.parse(JSON.stringify(tabToClose)),
         index: index
@@ -1254,226 +1082,8 @@
       }
     }
 
-    btnAddTab.addEventListener('click', () => createNewTab());
+    btnAddTab.addEventListener('click', createNewTab);
     btnRestoreTab.addEventListener('click', restoreLastClosedTab);
-
-    // ==========================================
-    //    РОЗУМНЕ ВИЯВЛЕННЯ ШИРОКОГО СПЕКТРУ ФАЙЛІВ
-    // ==========================================
-    // Підтримувані розширення файлів:
-    // JSON / дані: json, geojson, webmanifest, csv, tsv, xml, txt, md
-    // Графіка: svg
-    // Стилі: css, scss, sass, less
-    // Скрипти: js, mjs, ts, jsx, tsx
-    // Сторінки: html, htm, php
-    const SUPPORTED_EXTENSIONS = 'html?|php|css|scss|sass|less|js|mjs|ts|jsx|tsx|json|geojson|webmanifest|xml|csv|tsv|txt|md|svg';
-
-    function isLocalResource(url) {
-      if (!url) return false;
-      url = url.trim();
-      return !/^(https?:|\/\/|data:|blob:|javascript:|mailto:|tel:|#)/i.test(url);
-    }
-
-    function normalizePath(p) {
-      if (!p) return '';
-      let clean = p.split('?')[0].split('#')[0].trim();
-      clean = clean.replace(/^(\.\/|\/)+/, '');
-      return clean;
-    }
-
-    function extractReferencedFiles(code) {
-      if (!code || typeof code !== 'string') return [];
-      const files = new Set();
-
-      // 1. Пошук через DOMParser (HTML-теги)
-      try {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(code, 'text/html');
-
-        const selectors = [
-          'link[href]',
-          'script[src]',
-          'a[href]',
-          'iframe[src]',
-          'img[src]',
-          'object[data]',
-          'embed[src]',
-          'source[src]'
-        ];
-
-        doc.querySelectorAll(selectors.join(',')).forEach(el => {
-          const rawUrl = el.getAttribute('href') || el.getAttribute('src') || el.getAttribute('data');
-          if (isLocalResource(rawUrl)) {
-            const clean = normalizePath(rawUrl);
-            const extRx = new RegExp(`\\.(${SUPPORTED_EXTENSIONS})$`, 'i');
-            if (extRx.test(clean)) {
-              files.add(clean);
-            }
-          }
-        });
-      } catch (e) {}
-
-      // 2. Пошук у JS/CSS коді (fetch, axios, import, url() та літерали)
-      const callRx = new RegExp(`(?:fetch|axios\\.(?:get|post)|import|url)\\s*\\(\\s*["']([^"']+\\.(?:${SUPPORTED_EXTENSIONS})(?:[?#][^"']*)?)["']`, 'gi');
-      let m;
-      while ((m = callRx.exec(code)) !== null) {
-        if (isLocalResource(m[1])) files.add(normalizePath(m[1]));
-      }
-
-      // 3. Загальний пошук рядкових літералів з підтримуваними розширеннями ("data.json", "logo.svg")
-      const strRx = new RegExp(`["']([a-zA-Z0-9_\\-\\.\\/%]+\\.(?:${SUPPORTED_EXTENSIONS})(?:[?#][^"']*)?)["']`, 'gi');
-      while ((m = strRx.exec(code)) !== null) {
-        if (isLocalResource(m[1])) files.add(normalizePath(m[1]));
-      }
-
-      return Array.from(files).filter(f => f.length > 0 && f.includes('.'));
-    }
-
-    function checkAndSuggestFiles(code) {
-      const detected = extractReferencedFiles(code);
-      if (!detected || detected.length === 0) {
-        hideBanner();
-        return;
-      }
-
-      const existingTabNames = tabs.map(t => (t.customTitle || getTabTitle(t)).toLowerCase().trim());
-      const missing = detected.filter(file => {
-        const lower = file.toLowerCase();
-        const baseName = file.split('/').pop().toLowerCase();
-        return !existingTabNames.includes(lower) && !existingTabNames.includes(baseName);
-      });
-
-      if (missing.length === 0) {
-        hideBanner();
-        return;
-      }
-
-      showBanner(missing);
-    }
-
-    function showBanner(files) {
-      pendingFilesToCreate = [...files];
-      bannerTags.innerHTML = '';
-
-      files.forEach(file => {
-        const chip = document.createElement('button');
-        chip.className = 'banner-file-chip';
-        chip.title = `Створити вкладку для ${file}`;
-        chip.innerHTML = `
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-          <span>${file}</span>
-        `;
-        chip.addEventListener('click', () => {
-          createFileTab(file);
-          chip.remove();
-          pendingFilesToCreate = pendingFilesToCreate.filter(f => f !== file);
-          if (pendingFilesToCreate.length === 0) hideBanner();
-        });
-        bannerTags.appendChild(chip);
-      });
-
-      btnCreateAllTabs.textContent = files.length > 1 ? `Створити всі (${files.length})` : 'Створити вкладку';
-      bannerEl.style.display = 'flex';
-
-      clearTimeout(bannerDismissTimer);
-      bannerDismissTimer = setTimeout(hideBanner, 24000);
-    }
-
-    function hideBanner() {
-      bannerEl.style.display = 'none';
-      pendingFilesToCreate = [];
-      clearTimeout(bannerDismissTimer);
-    }
-
-    // Готовий стартовий шаблон для кожного типу
-    function getStarterTemplate(fileName) {
-      const lower = fileName.toLowerCase();
-      const baseName = fileName.split('/').pop();
-
-      if (lower.endsWith('.json') || lower.endsWith('.geojson') || lower.endsWith('.webmanifest')) {
-        if (baseName === 'manifest.json' || lower.endsWith('.webmanifest')) {
-          return `{\n  "name": "App",\n  "short_name": "App",\n  "start_url": "/",\n  "display": "standalone",\n  "background_color": "#09090b",\n  "theme_color": "#09090b"\n}\n`;
-        }
-        return `{\n  "title": "Дані з ${baseName}",\n  "items": [\n    { "id": 1, "name": "Елемент 1", "value": 100 },\n    { "id": 2, "name": "Елемент 2", "value": 200 }\n  ]\n}\n`;
-      }
-
-      if (lower.endsWith('.svg')) {
-        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n  <circle cx="12" cy="12" r="10"></circle>\n  <line x1="12" y1="8" x2="12" y2="12"></line>\n  <line x1="12" y1="16" x2="12.01" y2="16"></line>\n</svg>\n`;
-      }
-
-      if (lower.endsWith('.csv') || lower.endsWith('.tsv')) {
-        const sep = lower.endsWith('.tsv') ? '\t' : ',';
-        return `id${sep}name${sep}value\n1${sep}Alpha${sep}100\n2${sep}Beta${sep}200\n`;
-      }
-
-      if (lower.endsWith('.xml')) {
-        return `<?xml version="1.0" encoding="UTF-8"?>\n<data>\n  <item id="1">Приклад</item>\n</data>\n`;
-      }
-
-      if (lower.endsWith('.md')) {
-        return `# ${baseName}\n\nОпис вашого проекту...\n`;
-      }
-
-      if (lower.endsWith('.txt')) {
-        return `Текстові дані для ${baseName}\n`;
-      }
-
-      if (lower.endsWith('.css') || lower.endsWith('.scss') || lower.endsWith('.sass') || lower.endsWith('.less')) {
-        return `/* ${baseName} */\n\n`;
-      }
-
-      if (lower.endsWith('.js') || lower.endsWith('.mjs') || lower.endsWith('.ts') || lower.endsWith('.jsx') || lower.endsWith('.tsx')) {
-        return `// ${baseName}\n\n`;
-      }
-
-      if (/\.html?$/i.test(fileName) || lower.endsWith('.php')) {
-        return `<!DOCTYPE html>\n<html lang="uk">\n<head>\n  <meta charset="UTF-8">\n  <title>${baseName}</title>\n</head>\n<body>\n  \n</body>\n</html>`;
-      }
-
-      return `/* ${baseName} */\n\n`;
-    }
-
-    function createFileTab(fileName) {
-      const initialContent = getStarterTemplate(fileName);
-      createNewTab(fileName, initialContent);
-    }
-
-    btnCreateAllTabs.addEventListener('click', () => {
-      if (pendingFilesToCreate.length === 0) return;
-      const list = [...pendingFilesToCreate];
-      hideBanner();
-
-      list.forEach((file, index) => {
-        const initialContent = getStarterTemplate(file);
-        const newId = 'tab_' + Date.now() + '_' + index;
-        tabs.push({
-          id: newId,
-          customTitle: file,
-          code: initialContent,
-          history: [{ value: initialContent, selStart: initialContent.length, selEnd: initialContent.length }],
-          historyIndex: 0
-        });
-      });
-
-      const firstCreated = tabs[tabs.length - list.length];
-      if (firstCreated) {
-        switchTab(firstCreated.id);
-      }
-      renderTabs();
-      saveTabsToStorage();
-    });
-
-    btnCloseBanner.addEventListener('click', hideBanner);
-
-    editor.addEventListener('paste', (e) => {
-      const pasted = e.clipboardData ? e.clipboardData.getData('text') : '';
-      setTimeout(() => {
-        checkAndSuggestFiles(pasted || editor.value);
-      }, 70);
-    });
 
     // ==========================================
     //           СИСТЕМА НОМЕРІВ РЯДКІВ
@@ -1545,7 +1155,7 @@
     });
 
     // ==========================================
-    //           СИСТЕМА UNDO / REDO
+    //           СИСТЕМА UNDO / REDO РЕДАКТОРА
     // ==========================================
     let history = [{ value: '', selStart: 0, selEnd: 0 }];
     let historyIndex = 0;
@@ -1632,16 +1242,14 @@
     }
 
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        if (document.fullscreenElement) {
-          document.exitFullscreen();
-          return;
-        }
-        hideBanner();
+      if (e.key === 'Escape' && document.fullscreenElement) {
+        document.exitFullscreen();
+        return;
       }
 
       const isModifier = e.ctrlKey || e.metaKey;
 
+      // Відновлення вкладки за комбінацією Ctrl+Shift+T / Cmd+Shift+T
       if (isModifier && e.shiftKey && e.code === 'KeyT') {
         e.preventDefault();
         restoreLastClosedTab();
@@ -1660,187 +1268,16 @@
     });
 
     // ==========================================
-    //   ГОЛОВНИЙ РЕНДЕР ТА ВІРТУАЛЬНИЙ БАНДЛЕР
+    //           ГОЛОВНА ЛОГІКА РЕНДЕРУ (З ДЕБАУНСОМ)
     // ==========================================
     let renderTimer = null;
 
-    function isHtmlCode(str) {
-      if (!str) return false;
-      return /<!doctype|<html|<body|<div|<p|<head|<span|<section|<main|<header|<footer/i.test(str);
-    }
+    function getPreparedHtml(code) {
+      const trimmed = code.trim();
+      if (!trimmed) return EMPTY_DARK_TEMPLATE;
 
-    function getMainHtmlTab() {
-      const current = getActiveTab();
-      const currentTitle = (current.customTitle || getTabTitle(current)).toLowerCase();
-      const isDataOrAsset = /\.(json|geojson|webmanifest|svg|css|scss|less|js|mjs|ts|csv|tsv|xml|txt|md)$/i.test(currentTitle);
-
-      if (!isDataOrAsset && isHtmlCode(editor.value)) {
-        return { tab: current, isCurrent: true, code: editor.value };
-      }
-
-      const found = tabs.find(t => {
-        const title = (t.customTitle || getTabTitle(t)).toLowerCase();
-        if (/\.(json|geojson|webmanifest|svg|css|scss|less|js|mjs|ts|csv|tsv|xml|txt|md)$/i.test(title)) return false;
-        const c = t.id === activeTabId ? editor.value : t.code;
-        return isHtmlCode(c) || title.endsWith('.html');
-      });
-
-      if (found) {
-        return {
-          tab: found,
-          isCurrent: found.id === activeTabId,
-          code: found.id === activeTabId ? editor.value : found.code
-        };
-      }
-
-      return { tab: current, isCurrent: true, code: editor.value };
-    }
-
-    function getPreparedHtml() {
-      const mainSource = getMainHtmlTab();
-      let html = (mainSource.code || '').trim();
-
-      if (!html) return EMPTY_DARK_TEMPLATE;
-
-      // Якщо активний документ взагалі не є HTML і HTML-вкладок немає
-      if (!isHtmlCode(html) && !html.includes('<')) {
-        return `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="color-scheme" content="dark">
-  <style>
-    body {
-      background-color: #09090b;
-      color: #fafafa;
-      font-family: "JetBrains Mono", Consolas, monospace;
-      padding: 18px;
-      margin: 0;
-      white-space: pre-wrap;
-      font-size: 13px;
-      line-height: 1.5;
-    }
-  </style>
-</head>
-<body>${escapeHtml(html)}</body>
-</html>`;
-      }
-
-      // Карта всіх віртуальних файлів проекту
-      const virtualFilesMap = {};
-
-      tabs.forEach(tab => {
-        const name = (tab.customTitle || getTabTitle(tab)).trim();
-        if (!name) return;
-
-        const baseName = name.split('/').pop();
-        const content = (tab.id === activeTabId) ? editor.value : (tab.code || '');
-
-        virtualFilesMap[name] = content;
-        if (baseName !== name) {
-          virtualFilesMap[baseName] = content;
-        }
-
-        // 1. Інлайн CSS файлів у <link href="...">
-        if (name.endsWith('.css') || baseName.endsWith('.css')) {
-          const escName = escapeRegExp(name);
-          const escBase = escapeRegExp(baseName);
-          const linkRx = new RegExp(`<link[^>]+href=["'][^"']*(${escName}|${escBase})["'][^>]*>`, 'gi');
-          if (linkRx.test(html)) {
-            html = html.replace(linkRx, `<style data-virtual-file="${baseName}">\n${content}\n</style>`);
-          }
-        }
-
-        // 2. Інлайн JS файлів у <script src="...">
-        if (name.endsWith('.js') || baseName.endsWith('.js') || name.endsWith('.mjs')) {
-          const escName = escapeRegExp(name);
-          const escBase = escapeRegExp(baseName);
-          const scriptRx = new RegExp(`<script[^>]+src=["'][^"']*(${escName}|${escBase})["'][^>]*>\\s*<\\/script>`, 'gi');
-          if (scriptRx.test(html)) {
-            html = html.replace(scriptRx, `<script data-virtual-file="${baseName}">\n${content}\n<\/script>`);
-          }
-        }
-
-        // 3. Інлайн SVG у <img src="..."> та CSS url('...')
-        if (name.endsWith('.svg') || baseName.endsWith('.svg')) {
-          const escName = escapeRegExp(name);
-          const escBase = escapeRegExp(baseName);
-          const dataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(content)}`;
-
-          const imgRx = new RegExp(`(<img[^>]+src=["'])[^"']*(${escName}|${escBase})([^"']*["'])`, 'gi');
-          html = html.replace(imgRx, `$1${dataUrl}$3`);
-
-          const bgRx = new RegExp(`url\\(\\s*["']?[^"')]*(${escName}|${escBase})[^"')]*["']?\\s*\\)`, 'gi');
-          html = html.replace(bgRx, `url("${dataUrl}")`);
-        }
-      });
-
-      // Віртуальний перехоплювач fetch() та XMLHttpRequest для JSON/CSV/TXT файлів
-      const virtualFsScript = `<script id="__virtual_fs_interceptor__">
-(function() {
-  const virtualFiles = ${JSON.stringify(virtualFilesMap).replace(/<\/script/gi, '<\\/script')};
-
-  function getVirtualFile(url) {
-    if (!url) return null;
-    let clean = url.split('?')[0].split('#')[0].replace(/^(\\.\\/|\\/)+/, '');
-    let baseName = clean.split('/').pop();
-    if (Object.prototype.hasOwnProperty.call(virtualFiles, clean)) return { name: clean, content: virtualFiles[clean] };
-    if (Object.prototype.hasOwnProperty.call(virtualFiles, baseName)) return { name: baseName, content: virtualFiles[baseName] };
-    return null;
-  }
-
-  function getMime(name) {
-    name = name.toLowerCase();
-    if (name.endsWith('.json') || name.endsWith('.geojson') || name.endsWith('.webmanifest')) return 'application/json';
-    if (name.endsWith('.svg')) return 'image/svg+xml';
-    if (name.endsWith('.html') || name.endsWith('.htm')) return 'text/html';
-    if (name.endsWith('.css') || name.endsWith('.scss') || name.endsWith('.less')) return 'text/css';
-    if (name.endsWith('.js') || name.endsWith('.mjs') || name.endsWith('.ts')) return 'application/javascript';
-    if (name.endsWith('.csv') || name.endsWith('.tsv')) return 'text/csv';
-    if (name.endsWith('.xml')) return 'application/xml';
-    return 'text/plain';
-  }
-
-  // Перехоплення window.fetch()
-  const origFetch = window.fetch;
-  window.fetch = async function(resource, init) {
-    const url = typeof resource === 'string' ? resource : (resource && resource.url ? resource.url : '');
-    const found = getVirtualFile(url);
-    if (found) {
-      const mime = getMime(found.name);
-      return new Response(found.content, {
-        status: 200,
-        statusText: 'OK',
-        headers: { 'Content-Type': mime }
-      });
-    }
-    if (origFetch) return origFetch.apply(this, arguments);
-    return Promise.reject(new TypeError('Local virtual file not found: ' + url));
-  };
-
-  // Перехоплення XMLHttpRequest
-  const OrigXHR = window.XMLHttpRequest;
-  if (OrigXHR) {
-    window.XMLHttpRequest = function() {
-      const xhr = new OrigXHR();
-      const origOpen = xhr.open;
-      xhr.open = function(method, url) {
-        const found = getVirtualFile(url);
-        if (found) {
-          const mime = getMime(found.name);
-          const dataUrl = 'data:' + mime + ';charset=utf-8,' + encodeURIComponent(found.content);
-          return origOpen.call(xhr, method, dataUrl);
-        }
-        return origOpen.apply(xhr, arguments);
-      };
-      return xhr;
-    };
-  }
-})();
-<\/script>`;
-
-      const hasDocType = /<!doctype/i.test(html);
-      const hasHtmlTag = /<html[\s>]/i.test(html);
+      const hasDocType = /<!doctype/i.test(trimmed);
+      const hasHtmlTag = /<html[\s>]/i.test(trimmed);
 
       if (!hasDocType && !hasHtmlTag) {
         return `<!DOCTYPE html>
@@ -1848,7 +1285,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="color-scheme" content="dark">
-  ${virtualFsScript}
   <style>
     html, body {
       background-color: #09090b;
@@ -1860,26 +1296,20 @@
   </style>
 </head>
 <body>
-  ${html}
+  ${code}
 </body>
 </html>`;
       }
 
-      if (/<head[\s>]/i.test(html)) {
-        html = html.replace(/<head[\s>]/i, `$&${virtualFsScript}`);
-      } else {
-        html = virtualFsScript + html;
+      if (!trimmed.includes('color-scheme')) {
+        return trimmed.replace(/<head[\s>]/i, '$&<meta name="color-scheme" content="dark">');
       }
 
-      if (!html.includes('color-scheme')) {
-        html = html.replace(/<head[\s>]/i, '$&<meta name="color-scheme" content="dark">');
-      }
-
-      return html;
+      return trimmed;
     }
 
     function renderPreview() {
-      iframe.srcdoc = getPreparedHtml();
+      iframe.srcdoc = getPreparedHtml(editor.value);
     }
 
     function schedulePreview(delay = 250) {
@@ -2058,6 +1488,7 @@
     const resizeObserver = new ResizeObserver(updateView);
     resizeObserver.observe(previewContainer);
 
+    // Клавіша Tab — 2 пробіли
     editor.addEventListener('keydown', (e) => {
       if (e.key === 'Tab') {
         e.preventDefault();
@@ -2075,7 +1506,7 @@
       }
     });
 
-    // Початковий старт
+    // Початкова ініціалізація
     initTabs();
     applyLayout();
   </script>
