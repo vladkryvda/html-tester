@@ -75,82 +75,134 @@
       align-items: center;
       justify-content: space-between;
       padding: 0 12px;
-      background: rgba(9, 9, 11, 0.8);
+      background: rgba(9, 9, 11, 0.85);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       box-shadow: inset 0 -1px 0 0 rgba(255, 255, 255, 0.02);
       flex-shrink: 0;
       z-index: 30;
+      gap: 12px;
     }
 
-    /* Секція мінімалістичних вкладок */
+    /* ==========================================
+       НОВІ МІНІМАЛІСТИЧНІ ВКЛАДКИ (TABS)
+    ========================================== */
     .tabs-wrapper {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       height: 100%;
+      flex: 1;
+      min-width: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tabs-wrapper::-webkit-scrollbar {
+      display: none;
     }
 
     #tabs-container {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 3px;
+      min-width: 0;
     }
 
     .tab {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      height: 24px;
-      min-width: 24px;
-      padding: 0 7px;
+      height: 25px;
+      min-width: 58px;
+      max-width: 140px;
+      padding: 0 4px 0 9px;
       border-radius: 5px;
-      font-family: "JetBrains Mono", Consolas, monospace;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       font-size: 11px;
       color: var(--text);
       background: transparent;
-      border: 1px solid var(--border);
+      border: 1px solid transparent;
       cursor: pointer;
-      transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.14s ease;
       user-select: none;
+      position: relative;
     }
 
     .tab:hover {
       color: var(--text-hover);
-      background: rgba(255, 255, 255, 0.04);
-      border-color: var(--border-strong);
+      background: rgba(255, 255, 255, 0.025);
+      border-color: rgba(255, 255, 255, 0.06);
     }
 
     .tab.active {
       color: var(--text-active);
-      background: linear-gradient(180deg, #1c1c22 0%, #131317 100%);
-      border-color: var(--border-strong);
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      background: #141418;
+      border-color: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06);
     }
 
-    .tab:active {
-      transform: scale(0.95);
+    .tab-title {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      pointer-events: none;
+      font-weight: 450;
+      letter-spacing: -0.01em;
     }
 
+    .tab-rename-input {
+      flex: 1;
+      width: 100%;
+      min-width: 40px;
+      height: 19px;
+      background: #09090b;
+      border: 1px solid var(--border-strong);
+      border-radius: 3px;
+      color: #fafafa;
+      font-family: inherit;
+      font-size: 11px;
+      padding: 0 4px;
+      outline: none;
+    }
+
+    /* Хрестик закриття: стабільне позиціонування без стрибків ширини */
     .tab-close {
-      display: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
       margin-left: 4px;
-      font-size: 12px;
-      line-height: 1;
+      border-radius: 3px;
       color: #71717a;
+      opacity: 0;
       cursor: pointer;
-      transition: color 0.1s ease;
+      transition: opacity 0.12s ease, background 0.12s ease, color 0.12s ease;
+      flex-shrink: 0;
     }
 
     .tab:hover .tab-close {
-      display: inline-block;
+      opacity: 0.35;
+    }
+
+    .tab.active .tab-close {
+      opacity: 0.45;
     }
 
     .tab-close:hover {
-      color: var(--text-active);
+      opacity: 1 !important;
+      color: #fafafa;
+      background: rgba(255, 255, 255, 0.08);
     }
 
-    .btn-add-tab {
+    .tabs-actions {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+
+    .btn-tab-action {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -161,17 +213,22 @@
       border: 1px solid transparent;
       color: #52525b;
       cursor: pointer;
-      transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.15s ease;
     }
 
-    .btn-add-tab:hover {
+    .btn-tab-action:hover:not(:disabled) {
       color: var(--text-active);
       background: rgba(255, 255, 255, 0.05);
       border-color: var(--border);
     }
 
-    .btn-add-tab:active {
+    .btn-tab-action:active:not(:disabled) {
       transform: scale(0.92);
+    }
+
+    .btn-tab-action:disabled {
+      opacity: 0.18;
+      cursor: not-allowed;
     }
 
     /* Інструменти меню */
@@ -310,7 +367,6 @@
       overflow: hidden;
     }
 
-    /* «Примарні» номери рядків */
     .line-numbers {
       background: transparent;
       padding: 16px 6px 32px 14px;
@@ -390,7 +446,6 @@
       background: #27272a;
     }
 
-    /* Інженерна лінія розділювача */
     .resizer {
       background-color: var(--border);
       flex-shrink: 0;
@@ -452,7 +507,6 @@
       padding: 24px;
     }
 
-    /* Делікатна інженерна сітка точок та м'яке студійне світло */
     .preview-pane:not(.is-desktop) {
       background-color: #070709;
       background-image: 
@@ -468,9 +522,6 @@
       transform-origin: center center;
     }
 
-    /* ==========================================
-       ТИТАНОВИЙ КОРПУС СМАРТФОНА (HARDWARE REALISM)
-    ========================================== */
     .device-wrapper {
       position: relative;
       border-radius: 50px;
@@ -479,17 +530,15 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      /* Багатошарове металеве світло + глибокі м'які тіні */
       box-shadow:
-        0 0 0 1px rgba(255, 255, 255, 0.14),             /* зовнішня мікрофаска */
-        0 0 0 3px #1c1c20,                                 /* матове ребро титану */
-        0 0 0 4.5px rgba(0, 0, 0, 0.9),                    /* внутрішній контур скла */
-        0 30px 70px -15px rgba(0, 0, 0, 0.95),             /* основна розсіяна тінь */
-        0 15px 30px -8px rgba(0, 0, 0, 0.7);               /* контактна тінь */
+        0 0 0 1px rgba(255, 255, 255, 0.14),
+        0 0 0 3px #1c1c20,
+        0 0 0 4.5px rgba(0, 0, 0, 0.9),
+        0 30px 70px -15px rgba(0, 0, 0, 0.95),
+        0 15px 30px -8px rgba(0, 0, 0, 0.7);
       transition: box-shadow 0.25s ease, border-radius 0.25s ease;
     }
 
-    /* Dynamic Island зі скляним бліком */
     .device-notch {
       position: absolute;
       top: 11px;
@@ -504,7 +553,6 @@
       box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.07), 0 2px 6px rgba(0, 0, 0, 0.7);
     }
 
-    /* Вічко фронтальної камери з відблиском лінзи */
     .device-notch::after {
       content: '';
       position: absolute;
@@ -518,7 +566,6 @@
       box-shadow: inset 0 0 1px 1px rgba(255, 255, 255, 0.12);
     }
 
-    /* Повні права для 3D, Pointer Lock та повноекранного режиму */
     iframe {
       width: 100%;
       height: 100%;
@@ -587,12 +634,20 @@
   <header>
     <div class="tabs-wrapper">
       <div id="tabs-container"></div>
-      <button class="btn-add-tab" id="btn-add-tab" title="Нова вкладка">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-      </button>
+      <div class="tabs-actions">
+        <button class="btn-tab-action" id="btn-add-tab" title="Нова вкладка">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+        <button class="btn-tab-action" id="btn-restore-tab" title="Відновити закриту вкладку (Ctrl+Shift+T)" disabled>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+          </svg>
+        </button>
+      </div>
     </div>
 
     <div class="header-actions">
@@ -683,6 +738,7 @@
 
     const tabsContainer = document.getElementById('tabs-container');
     const btnAddTab = document.getElementById('btn-add-tab');
+    const btnRestoreTab = document.getElementById('btn-restore-tab');
     const btnModeDesktop = document.getElementById('btn-mode-desktop');
     const btnModeMobile = document.getElementById('btn-mode-mobile');
     const deviceSelect = document.getElementById('device-select');
@@ -715,21 +771,23 @@
 </html>`;
 
     // ==========================================
-    //           СИСТЕМА ВКЛАДОК (TABS)
+    //           СИСТЕМА ВКЛАДОК ТА UNDO
     // ==========================================
     let tabs = [];
     let activeTabId = null;
+    let closedTabs = [];
 
     function initTabs() {
       const savedTabs = localStorage.getItem('sim_tabs_v2');
       const savedActiveId = localStorage.getItem('sim_active_tab_v2');
+      const savedClosed = localStorage.getItem('sim_closed_tabs_v2');
+
+      if (savedClosed) {
+        try { closedTabs = JSON.parse(savedClosed); } catch (e) { closedTabs = []; }
+      }
 
       if (savedTabs) {
-        try {
-          tabs = JSON.parse(savedTabs);
-        } catch (e) {
-          tabs = [];
-        }
+        try { tabs = JSON.parse(savedTabs); } catch (e) { tabs = []; }
       }
 
       if (!tabs || tabs.length === 0) {
@@ -737,6 +795,7 @@
         tabs = [
           {
             id: 'tab_1',
+            customTitle: null,
             code: legacyCode,
             history: [{ value: legacyCode, selStart: 0, selEnd: 0 }],
             historyIndex: 0
@@ -750,6 +809,7 @@
 
       renderTabs();
       loadTabContent(activeTabId);
+      updateRestoreButtonState();
     }
 
     function getActiveTab() {
@@ -765,37 +825,149 @@
       }
     }
 
+    function saveClosedTabsToStorage() {
+      try {
+        localStorage.setItem('sim_closed_tabs_v2', JSON.stringify(closedTabs));
+      } catch (err) {}
+      updateRestoreButtonState();
+    }
+
+    function updateRestoreButtonState() {
+      if (!btnRestoreTab) return;
+      btnRestoreTab.disabled = closedTabs.length === 0;
+      if (closedTabs.length > 0) {
+        const last = closedTabs[closedTabs.length - 1];
+        const title = getTabTitle(last.tab);
+        btnRestoreTab.title = `Відновити "${title}" (Ctrl+Shift+T)`;
+      } else {
+        btnRestoreTab.title = 'Немає закритих вкладок (Ctrl+Shift+T)';
+      }
+    }
+
+    // Розумне визначення назви: без цифр
+    function getTabTitle(tab) {
+      if (tab.customTitle && tab.customTitle.trim()) {
+        return tab.customTitle.trim();
+      }
+      if (tab.code && typeof tab.code === 'string') {
+        const titleMatch = tab.code.match(/<title[^>]*>([^<]+)<\/title>/i);
+        if (titleMatch && titleMatch[1].trim()) {
+          return titleMatch[1].trim();
+        }
+        const hMatch = tab.code.match(/<h[1-2][^>]*>([^<]+)<\/h[1-2]>/i);
+        if (hMatch && hMatch[1].trim()) {
+          return hMatch[1].trim();
+        }
+      }
+      return 'untitled';
+    }
+
     function renderTabs() {
       tabsContainer.innerHTML = '';
-      if (tabs.length <= 1) return;
 
-      tabs.forEach((tab, index) => {
+      tabs.forEach((tab) => {
         const tabEl = document.createElement('div');
-        tabEl.className = `tab ${tab.id === activeTabId ? 'active' : ''}`;
-        tabEl.title = `Вкладка ${index + 1}`;
+        const isActive = tab.id === activeTabId;
+        tabEl.className = `tab ${isActive ? 'active' : ''}`;
+        tabEl.dataset.tabId = tab.id;
 
-        const numSpan = document.createElement('span');
-        numSpan.textContent = index + 1;
+        const titleText = getTabTitle(tab);
+        tabEl.title = `${titleText} (подвійний клік для перейменування)`;
 
-        const closeBtn = document.createElement('span');
-        closeBtn.className = 'tab-close';
-        closeBtn.innerHTML = '&times;';
-        closeBtn.title = 'Закрити';
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'tab-title';
+        titleSpan.textContent = titleText;
+        tabEl.appendChild(titleSpan);
 
-        closeBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          closeTab(tab.id);
-        });
+        // Хрестик доступний, якщо є більше 1 вкладки
+        if (tabs.length > 1) {
+          const closeBtn = document.createElement('span');
+          closeBtn.className = 'tab-close';
+          closeBtn.title = 'Закрити (відновлення: Ctrl+Shift+T)';
+          closeBtn.innerHTML = `
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          `;
 
-        tabEl.appendChild(numSpan);
-        tabEl.appendChild(closeBtn);
+          closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeTab(tab.id);
+          });
+
+          tabEl.appendChild(closeBtn);
+        }
 
         tabEl.addEventListener('click', () => {
           switchTab(tab.id);
         });
 
+        // Закриття середньою кнопкою миші (коліщатком)
+        tabEl.addEventListener('auxclick', (e) => {
+          if (e.button === 1 && tabs.length > 1) {
+            e.preventDefault();
+            closeTab(tab.id);
+          }
+        });
+
+        // Подвійний клік для швидкого перейменування
+        tabEl.addEventListener('dblclick', (e) => {
+          if (e.target.closest('.tab-close')) return;
+          startRenameTab(tab.id);
+        });
+
         tabsContainer.appendChild(tabEl);
       });
+
+      updateRestoreButtonState();
+    }
+
+    function startRenameTab(tabId) {
+      const tab = tabs.find(t => t.id === tabId);
+      if (!tab) return;
+      const tabEl = tabsContainer.querySelector(`.tab[data-tab-id="${tabId}"]`);
+      if (!tabEl) return;
+
+      const titleSpan = tabEl.querySelector('.tab-title');
+      if (!titleSpan) return;
+
+      const currentVal = tab.customTitle || getTabTitle(tab);
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'tab-rename-input';
+      input.value = currentVal === 'untitled' ? '' : currentVal;
+      input.placeholder = 'untitled';
+
+      titleSpan.style.display = 'none';
+      tabEl.insertBefore(input, titleSpan);
+      input.focus();
+      input.select();
+
+      let finished = false;
+      const commit = (shouldSave) => {
+        if (finished) return;
+        finished = true;
+        if (shouldSave) {
+          const val = input.value.trim();
+          tab.customTitle = val.length > 0 ? val : null;
+          saveTabsToStorage();
+        }
+        renderTabs();
+      };
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          commit(true);
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          commit(false);
+        }
+      });
+
+      input.addEventListener('blur', () => commit(true));
+      input.addEventListener('click', (e) => e.stopPropagation());
     }
 
     function switchTab(newTabId) {
@@ -839,6 +1011,7 @@
       const newId = 'tab_' + Date.now();
       const newTab = {
         id: newId,
+        customTitle: null,
         code: '',
         history: [{ value: '', selStart: 0, selEnd: 0 }],
         historyIndex: 0
@@ -854,10 +1027,25 @@
       const index = tabs.findIndex(t => t.id === tabId);
       if (index === -1) return;
 
+      const tabToClose = tabs[index];
+      if (tabId === activeTabId) {
+        tabToClose.code = editor.value;
+        tabToClose.history = history;
+        tabToClose.historyIndex = historyIndex;
+      }
+
+      // Зберігаємо у стек відновлення
+      closedTabs.push({
+        tab: JSON.parse(JSON.stringify(tabToClose)),
+        index: index
+      });
+      if (closedTabs.length > 25) closedTabs.shift();
+      saveClosedTabsToStorage();
+
       tabs.splice(index, 1);
 
       if (activeTabId === tabId) {
-        const nextIndex = Math.max(0, index - 1);
+        const nextIndex = Math.min(index, tabs.length - 1);
         activeTabId = tabs[nextIndex].id;
         loadTabContent(activeTabId);
       }
@@ -866,7 +1054,36 @@
       saveTabsToStorage();
     }
 
+    function restoreLastClosedTab() {
+      if (closedTabs.length === 0) return;
+
+      const restoredItem = closedTabs.pop();
+      saveClosedTabsToStorage();
+
+      const insertIndex = Math.min(restoredItem.index, tabs.length);
+      tabs.splice(insertIndex, 0, restoredItem.tab);
+
+      activeTabId = restoredItem.tab.id;
+      renderTabs();
+      loadTabContent(activeTabId);
+      saveTabsToStorage();
+    }
+
+    function updateActiveTabDisplayTitle() {
+      const curTab = getActiveTab();
+      if (!curTab || curTab.customTitle) return;
+      const tabEl = tabsContainer.querySelector(`.tab[data-tab-id="${curTab.id}"] .tab-title`);
+      if (tabEl) {
+        const currentTitle = getTabTitle(curTab);
+        if (tabEl.textContent !== currentTitle) {
+          tabEl.textContent = currentTitle;
+          tabEl.parentElement.title = `${currentTitle} (подвійний клік для перейменування)`;
+        }
+      }
+    }
+
     btnAddTab.addEventListener('click', createNewTab);
+    btnRestoreTab.addEventListener('click', restoreLastClosedTab);
 
     // ==========================================
     //           СИСТЕМА НОМЕРІВ РЯДКІВ
@@ -938,7 +1155,7 @@
     });
 
     // ==========================================
-    //           СИСТЕМА UNDO / REDO
+    //           СИСТЕМА UNDO / REDO РЕДАКТОРА
     // ==========================================
     let history = [{ value: '', selStart: 0, selEnd: 0 }];
     let historyIndex = 0;
@@ -991,6 +1208,7 @@
       if (curTab) curTab.code = state.value;
       schedulePreview(0);
       updateLineNumbers();
+      updateActiveTabDisplayTitle();
       editor.focus();
       editor.setSelectionRange(state.selStart, state.selEnd);
       isApplyingHistory = false;
@@ -1030,6 +1248,14 @@
       }
 
       const isModifier = e.ctrlKey || e.metaKey;
+
+      // Відновлення вкладки за комбінацією Ctrl+Shift+T / Cmd+Shift+T
+      if (isModifier && e.shiftKey && e.code === 'KeyT') {
+        e.preventDefault();
+        restoreLastClosedTab();
+        return;
+      }
+
       if (isModifier) {
         if (e.code === 'KeyZ') {
           e.preventDefault();
@@ -1093,7 +1319,10 @@
 
     editor.addEventListener('input', () => {
       const curTab = getActiveTab();
-      if (curTab) curTab.code = editor.value;
+      if (curTab) {
+        curTab.code = editor.value;
+        updateActiveTabDisplayTitle();
+      }
       schedulePreview(250);
       saveHistoryState();
       updateLineNumbers();
@@ -1259,7 +1488,7 @@
     const resizeObserver = new ResizeObserver(updateView);
     resizeObserver.observe(previewContainer);
 
-    // Tab key 2 пробіли
+    // Клавіша Tab — 2 пробіли
     editor.addEventListener('keydown', (e) => {
       if (e.key === 'Tab') {
         e.preventDefault();
